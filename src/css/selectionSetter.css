@@ -1,0 +1,14 @@
+/* .welcomeRestauron {
+
+    @media (width < 100px) {
+        display: grid;
+        grid-template-columns: 1;
+        height: 600px;
+    
+    }
+} */
+
+::selection {
+    background-color: #ffcc00;
+    color: #000;
+}
