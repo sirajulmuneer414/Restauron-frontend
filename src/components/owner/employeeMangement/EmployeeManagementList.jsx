@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosOwnerInstance } from '../../axios/instances/axiosInstances'; // Assuming you have an axios instance for owner routes
-import { Button } from '../ui/button';
 import { User, Phone, CreditCard, Eye, Search, Filter, List, Grid } from 'lucide-react';
+import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
+import { Button } from '../../ui/button';
 
 function EmployeeManagementList() {
   const navigate = useNavigate();
@@ -79,6 +79,9 @@ function EmployeeManagementList() {
   const handleViewDetails = (encryptedId) => {
     navigate(`/owner/employees/detail/${encryptedId}`);
   };
+  const onAddEmployeeButtonClick = () => {
+    navigate('/owner/employees/add');
+  }
   
     // --- Pagination Logic (same as your original component) ---
     const canGoPrev = page > 0;
@@ -185,7 +188,7 @@ function EmployeeManagementList() {
                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-yellow-500 text-black' : 'hover:bg-gray-700'}`}><Grid size={20}/></button>
                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-yellow-500 text-black' : 'hover:bg-gray-700'}`}><List size={20}/></button>
             </div>
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg">
+            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg" onClick = {() => onAddEmployeeButtonClick()}>
                 + Add Employee
             </Button>
         </div>
@@ -251,7 +254,7 @@ function EmployeeManagementList() {
 
       {/* Empty State and Pagination */}
       {!isLoading && employeeList.length === 0 ? (
-        <div className="p-10 text-center text-gray-500">
+        <div className="p-10 text-center text-gray-300">
             <h3 className="text-xl font-semibold text-white mb-2">No Employees Found</h3>
             <p>Try adjusting your filters or add a new employee.</p>
         </div>

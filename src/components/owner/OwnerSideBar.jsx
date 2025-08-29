@@ -11,10 +11,13 @@ import {
   Sun, // Example icon for a menu item
   DollarSign // Example icon
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 const OwnerSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  const user = useSelector((state) => state.userSlice.user);
+  const restaurantName = useSelector((state) => state.ownerDetailsSlice.restaurantName);
   const commonLinkClasses = 'flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200';
   const activeClasses = 'bg-yellow-500/10 text-yellow-300 border-l-4 border-yellow-500';
   const inactiveClasses = 'text-gray-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent';
@@ -106,8 +109,8 @@ const OwnerSidebar = () => {
             className="w-10 h-10 rounded-full border-2 border-yellow-500/50"
           />
           <div className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-            <h4 className="font-semibold text-white whitespace-nowrap">Your Name</h4>
-            <p className="text-xs text-gray-400 whitespace-nowrap">Restaurant Owner</p>
+            <h4 className="font-semibold text-white whitespace-nowrap">{user.name}</h4>
+            <p className="text-xs text-gray-400 whitespace-nowrap">{restaurantName}</p>
           </div>
         </div>
       </div>

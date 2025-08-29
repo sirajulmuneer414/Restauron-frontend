@@ -4,6 +4,7 @@ import isLoadingSlice from '../slice/isLoadingSlice'
 import specialPermissionsSlice from '../slice/specialPermissions'
 import userSlice from '../slice/userSlice'
 import specialValuesSlice from '../slice/specialValues'
+import ownerDetailsSlice from '../slice/ownerDetailsSlice'
 
 
 export default configureStore({
@@ -13,6 +14,7 @@ export default configureStore({
         isLoadingSlice: isLoadingSlice,
         specialPermissions: specialPermissionsSlice,
         userSlice: userSlice,
-        specialValues: specialValuesSlice
+        specialValues: specialValuesSlice,
+        ownerDetailsSlice: ownerDetailsSlice
     }
 })

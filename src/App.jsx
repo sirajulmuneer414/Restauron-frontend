@@ -3,15 +3,24 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { useSelector } from "react-redux";
 import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
-import AdminLayoutPage from "./pages/admin/AdminLayoutPage";
-import RestaurantRequestDetails from "./components/admin/RestaurantRequestDetails";
 
 
-const Signup = lazy(() => import("./pages/signupAndLogin/Signup"));
+const AdminLayoutPage = lazy(() =>
+  import("./pages/admin/AdminLayoutPage")
+);
+const AddEmployee = lazy(() =>
+  import("./components/owner/employeeMangement/AddEmployee")
+);
+
+const Signup = lazy(() =>
+  import("./pages/signupAndLogin/Signup")
+);
 const OtpVerifcationPage = lazy(() =>
   import("./pages/signupAndLogin/OtpVerifcationPage")
 );
-const Login = lazy(() => import("./pages/signupAndLogin/Login"));
+const Login = lazy(() =>
+  import("./pages/signupAndLogin/Login")
+);
 const WaitingForApproval = lazy(() =>
   import("./components/login/WaitingForApproval")
 );
@@ -23,6 +32,15 @@ const RestaurantApprovalRequests = lazy(() =>
 );
 const UserManagementList = lazy(() =>
   import("./components/admin/UserManagementList")
+);
+const OwnerLayoutPage = lazy(() =>
+  import("./pages/owner/OwnerLayoutPage")
+);
+const EmployeeManagementList = lazy(() =>
+  import("./components/owner/employeeMangement/EmployeeManagementList")
+);
+const RestaurantRequestDetails = lazy(() =>
+  import("./components/admin/RestaurantRequestDetails")
 );
 
 
@@ -54,7 +72,7 @@ function App() {
 
           {user && user.role.toLowerCase() === "admin" ? (
             <Route path="/admin" element={<AdminLayoutPage />}>
-
+              {/* Define admin-specific routes here */}
               <Route
                 path="restaurants/requests"
                 element={<RestaurantApprovalRequests />}
@@ -66,14 +84,38 @@ function App() {
               <Route
                 path="users"
                 element={<UserManagementList />}
-                />
+              />
             </Route>
           ) : (
             <Route
-              path="/admin/restaurants/requests"
+              path="/admin/*"
               element={<NotAutherizedPageSignup />}
             />
           )}
+          {user && user.role.toLowerCase() === "owner" ? (
+            <Route
+              path="/owner"
+              element={<OwnerLayoutPage />}
+            >
+              {/* Define owner-specific routes here */}
+              <Route
+                path="employees/list"
+                element={<EmployeeManagementList />}
+              />
+              <Route
+                path="employees/add"
+                element={<AddEmployee />}
+              />
+
+            </Route>
+          ) : (
+            <Route
+              path="/owner/*"
+              element={<NotAutherizedPageSignup />}
+            />
+          )
+
+          }
         </Routes>
       </Suspense>
     </>

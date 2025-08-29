@@ -17,6 +17,16 @@ export const axiosSignupInstance = axios.create({
     },
 });
 
+export const axiosOwnerInstance = axios.create({
+    baseURL: "http://localhost:8081/owner",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+
+    },
+});
+
+
 export const axiosLoginInstance = axios.create({
     baseURL: "http://localhost:8081/auth/login",
     headers: {
@@ -34,6 +44,21 @@ export const axiosAdminInstance = axios.create({
     withCredentials: true
 });
 
+axiosOwnerInstance.interceptors.request.use((config) => {
+    const token = Cookies.get("jwtToken");
+    const restaruantId = Cookies.get("restaurantId");
+
+    if(token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    if(restaruantId) {
+        config.headers["X-Restaurant-Id"] = restaruantId;
+    }
+
+
+    return config;
+})
 
 axiosInstances.interceptors.request.use((config) => {
     const token = Cookies.get("jwtToken");

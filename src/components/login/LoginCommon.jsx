@@ -1,4 +1,3 @@
-
 import { Field, Formik } from 'formik';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,11 +7,12 @@ import { Input } from '../ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import LogoGolden from '../../assets/logo-golden.png';
 import Table from '../../assets/login-back.jpg';
-import { axiosLoginInstance } from '../../axios/instances/axiosInstances';
+import { axiosInstances, axiosLoginInstance } from '../../axios/instances/axiosInstances';
 import { setSignupOption } from '../../redux/slice/signupOptionSlice';
 import Cookie from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { setUserDetails } from '../../redux/slice/userSlice';
+import { setOwnerDetails } from '../../redux/slice/ownerDetailsSlice';
 import { setWaitingForApprovalMessage } from '../../redux/slice/specialValues';
 
 function LoginCommon() {
@@ -104,7 +104,18 @@ function LoginCommon() {
                       navigate('/admin/restaurants/requests');
                       break;
                     case 'owner':
-                      navigate('/restaurant/employees/requests');
+                      const ownerResponse = await axiosInstances.get(`/owner/get-restaurant-details/${jwtDecoded.userId}`);
+                      if (ownerResponse.status === 200) {
+                        const restaurantId = ownerResponse.data.restaurantEncryptedId;
+                        console.log('Restaurant ID:', restaurantId);
+                        Cookie.set('restaurantId', restaurantId);
+                        const restaurantName = ownerResponse.data.restaurantName;
+                        dispatch(setOwnerDetails({
+                          restaurantEncryptedId: restaurantId,
+                          restaurantName: restaurantName,
+                        }));
+                      }
+                      navigate('/owner/employees/list');
                       break;
                     case 'employee':
                       navigate('/employee/dashboard');
