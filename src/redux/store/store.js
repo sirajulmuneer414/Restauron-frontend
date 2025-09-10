@@ -6,7 +6,6 @@ import userSlice from '../slice/userSlice'
 import specialValuesSlice from '../slice/specialValues'
 import ownerDetailsSlice from '../slice/ownerDetailsSlice'
 
-
 export default configureStore({
     reducer: {
         // Add your reducers here
@@ -15,6 +14,6 @@ export default configureStore({
         specialPermissions: specialPermissionsSlice,
         userSlice: userSlice,
         specialValues: specialValuesSlice,
-        ownerDetailsSlice: ownerDetailsSlice
+        ownerDetailsSlice: ownerDetailsSlice,
     }
 })

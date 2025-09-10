@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
 import{ Button } from '../ui/button'
 import { resetAllowOtp, resetOtpEmail } from '../../redux/slice/signupOptionSlice';
+import toast from 'react-hot-toast';
 
 function OtpVerification() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -109,7 +110,7 @@ function OtpVerification() {
 
       if (response && response.data === true) { // Check if response data is true
         setIsLoading(false);
-        alert("OTP Verified Successfully!");
+        toast.success("OTP Verified Successfully!");
         dispatch(resetAllowOtp()); // Reset OTP state
         navigate("/login");
         setOtp(["", "", "", "", "", ""]);
@@ -140,7 +141,7 @@ function OtpVerification() {
 
         if (response.status === 200) {
 
-          alert("OTP Resent Successfully!");
+          toast.success("OTP Resent Successfully!");
         }
       }
       catch (error) {
@@ -158,7 +159,7 @@ function OtpVerification() {
 
         if (response.status === 200) {
 
-          alert("OTP Resent Successfully!");
+          toast.success("OTP Resent Successfully!");
         }
       }
       catch (error) {
@@ -174,7 +175,7 @@ function OtpVerification() {
 
         if (response.status === 200) {
 
-          alert("OTP Resent Successfully!");
+          toast.success("OTP Resent Successfully!");
         }
       }
       catch (error) {

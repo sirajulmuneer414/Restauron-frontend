@@ -5,13 +5,18 @@ import { useSelector } from "react-redux";
 import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 
 
+const CustomerAuthPage = lazy(() => 
+  import("./pages/customer/CustomerAuthPage")
+);
 const AdminLayoutPage = lazy(() =>
   import("./pages/admin/AdminLayoutPage")
 );
 const AddEmployee = lazy(() =>
   import("./components/owner/employeeMangement/AddEmployee")
 );
-
+const EmployeeIndividualDetails = lazy(() =>
+  import("./components/owner/employeeMangement/EmployeeIndividualDetails")
+);
 const Signup = lazy(() =>
   import("./pages/signupAndLogin/Signup")
 );
@@ -42,6 +47,26 @@ const EmployeeManagementList = lazy(() =>
 const RestaurantRequestDetails = lazy(() =>
   import("./components/admin/RestaurantRequestDetails")
 );
+const EmployeeLayoutPage = lazy(() =>
+  import("./pages/employee/EmployeeLayoutPage")
+);
+const EmployeeDashboard = lazy(() =>
+  import("./components/employee/EmployeeDashboard")
+);
+const EmployeeProfilePage = lazy(() =>
+  import("./components/employee/profile/EmployeeProfilePage")
+);
+const EmployeeChangePasswordPage = lazy(() =>
+  import("./components/employee/profile/EmployeeChangePasswordPage")
+);
+const CustomerLayout = lazy(() =>
+  import("./pages/customer/CustomerLayout")
+);
+const RestaurantHomePage = lazy(() =>
+  import("./components/customer/restaurant/RestaurantHomePage")
+);
+
+CustomerAuthPage
 
 
 function App() {
@@ -51,8 +76,8 @@ function App() {
   return (
     <>
       {/* <Circle></Circle>  */}
-
       <Suspense fallback={<CommonLoadingSpinner />} >
+
         <Routes>
           <Route path="/" element={<Signup />} />
           {otpPermission ? (
@@ -64,11 +89,13 @@ function App() {
             />
           )}
 
+
           <Route path="/login" element={<Login />} />
           <Route
             path="/waiting-for-approval"
             element={<WaitingForApproval />}
           />
+
 
           {user && user.role.toLowerCase() === "admin" ? (
             <Route path="/admin" element={<AdminLayoutPage />}>
@@ -92,6 +119,8 @@ function App() {
               element={<NotAutherizedPageSignup />}
             />
           )}
+
+
           {user && user.role.toLowerCase() === "owner" ? (
             <Route
               path="/owner"
@@ -106,6 +135,10 @@ function App() {
                 path="employees/add"
                 element={<AddEmployee />}
               />
+              <Route
+                path="employees/detail/:employeeId"
+                element={<EmployeeIndividualDetails />}
+              />
 
             </Route>
           ) : (
@@ -114,8 +147,28 @@ function App() {
               element={<NotAutherizedPageSignup />}
             />
           )
-
           }
+
+          {user && user.role.toLowerCase() === "employee" ? (
+            <Route path="/employee" element={<EmployeeLayoutPage />}>
+              <Route path="dashboard" element={<EmployeeDashboard />} /> {/* Default page */}
+              <Route path="profile/:specialId" element={<EmployeeProfilePage />} />{/* Profile page */}
+              <Route path="change-password" element={<EmployeeChangePasswordPage />} />
+  
+              {/* Add other employee routes here */}
+            </Route>
+          ) : (
+            <Route
+              path="/employee/*"
+              element={<NotAutherizedPageSignup />}
+            />
+          )}
+
+          <Route path="/restaurant/:encryptedId" element={<CustomerLayout />}>
+            <Route path="home" element={<RestaurantHomePage />} />
+            
+          </Route>
+          <Route path="/public/login/:encryptedId" element={<CustomerAuthPage />} />
         </Routes>
       </Suspense>
     </>

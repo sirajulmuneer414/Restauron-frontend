@@ -5,7 +5,8 @@ const initialState = {
     name: "",
     role: "",
     email: "",
-    userId: ""
+    userId: "",
+    specialId: ""
     }
 }
 
@@ -22,10 +23,17 @@ export const userSlice = createSlice({
         },
         resetUserDetails: (state) => {
             state.user = initialState.user;
+        },
+        setSpecialId: (state, action) => {
+            state.user.specialId = action.payload.specialId;
+        },
+        resetSpecialId: (state) => {
+            state.user.specialId = initialState.user.specialId;
         }
+
     }
 });
 
-export const {setUserDetails, resetUserDetails} = userSlice.actions;
+export const {setUserDetails, resetUserDetails, setSpecialId, resetSpecialId} = userSlice.actions;
 
 export default userSlice.reducer;

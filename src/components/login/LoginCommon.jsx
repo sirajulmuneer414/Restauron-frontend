@@ -11,7 +11,7 @@ import { axiosInstances, axiosLoginInstance } from '../../axios/instances/axiosI
 import { setSignupOption } from '../../redux/slice/signupOptionSlice';
 import Cookie from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-import { setUserDetails } from '../../redux/slice/userSlice';
+import { setSpecialId, setUserDetails } from '../../redux/slice/userSlice';
 import { setOwnerDetails } from '../../redux/slice/ownerDetailsSlice';
 import { setWaitingForApprovalMessage } from '../../redux/slice/specialValues';
 
@@ -118,7 +118,22 @@ function LoginCommon() {
                       navigate('/owner/employees/list');
                       break;
                     case 'employee':
-                      navigate('/employee/dashboard');
+                      const employeeResponse = await axiosInstances.get(`/employee/get-restaurant-details/${jwtDecoded.userId}`);
+                      if (employeeResponse.status === 200) {
+                        const restaurantId = employeeResponse.data.restaurantEncryptedId;
+                        console.log('Restaurant ID:', restaurantId);
+                        Cookie.set('restaurantId', restaurantId);
+                        const restaurantName = employeeResponse.data.restaurantName;
+                        dispatch(setOwnerDetails({
+                          restaurantEncryptedId: restaurantId,
+                          restaurantName: restaurantName,
+                        }));
+                        dispatch(setSpecialId({
+                          specialId: employeeResponse.data.specialId,
+                        }));
+
+                        navigate(`/employee/dashboard`); // Redirect to employee dashboard
+                      }
                       break;
                     default:
                       console.error('Unknown role:', jwtDecoded.role);

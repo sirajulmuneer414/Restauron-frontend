@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { axiosSignupInstance } from '../../axios/instances/axiosInstances';
 import { setAllowOtp, setSignupOption, setOtpEmail } from '../../redux/slice/signupOptionSlice';
 import { setAdminPageAccess } from '../../redux/slice/specialPermissions';
+import toast from 'react-hot-toast';
 
 function AdminSignup() {
  
@@ -166,7 +167,7 @@ function AdminSignup() {
       console.log('Response:', response);
       if (response.data === true) {
        
-        alert('Registration successful! Please verify your OTP.');
+       toast.success('Registration successful! Please verify your OTP.');
         await dispatch(setOtpEmail(formData.email)); 
         await dispatch(setAllowOtp(true));
         navigate('/otpVerification');

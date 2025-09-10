@@ -26,6 +26,14 @@ export const axiosOwnerInstance = axios.create({
     },
 });
 
+export const axiosPublicInstance = axios.create({
+    baseURL: "http://localhost:8081/public",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+    },
+});
+
 
 export const axiosLoginInstance = axios.create({
     baseURL: "http://localhost:8081/auth/login",
@@ -44,6 +52,25 @@ export const axiosAdminInstance = axios.create({
     withCredentials: true
 });
 
+export const axiosEmployeeInstance = axios.create({
+    baseURL: "http://localhost:8081/employee",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+    },
+    withCredentials: true
+});
+
+export const axiosCustomerInstance = axios.create({
+    baseURL: "http://localhost:8081/customer",
+    headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+    },
+    withCredentials: true
+});
+
+
 axiosOwnerInstance.interceptors.request.use((config) => {
     const token = Cookies.get("jwtToken");
     const restaruantId = Cookies.get("restaurantId");
@@ -57,6 +84,17 @@ axiosOwnerInstance.interceptors.request.use((config) => {
     }
 
 
+    return config;
+})
+axiosPublicInstance.interceptors.request.use((config) => {
+    const token = Cookies.get("jwtToken");
+    const restaruantId = Cookies.get("restaurantId");
+    if(token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    if(restaruantId) {
+        config.headers["X-Restaurant-Id"] = restaruantId;
+    }
     return config;
 })
 
@@ -80,3 +118,23 @@ axiosAdminInstance.interceptors.request.use((config) => {
     return config;
 })
 
+axiosEmployeeInstance.interceptors.request.use((config) => {
+    const token = Cookies.get("jwtToken");
+    const restaruantId = Cookies.get("restaurantId");
+    if(token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    if(restaruantId) {
+        config.headers["X-Restaurant-Id"] = restaruantId;
+    }
+    return config;
+})
+
+axiosCustomerInstance.interceptors.request.use((config) => {
+    const token = Cookies.get("jwtToken");
+
+    if(token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config;
+})
