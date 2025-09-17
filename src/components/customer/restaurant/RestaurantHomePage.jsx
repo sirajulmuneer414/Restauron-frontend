@@ -1,28 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { axiosPublicInstance } from '../../../axios/instances/axiosInstances';
 import Cookie from 'js-cookie';
-
 // UI Components and Icons
 import { Button } from '../../ui/button';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 import { LogIn, User as UserIcon, Menu, Phone, ShieldAlert } from 'lucide-react';
+import { setOwnerDetails } from '../../../redux/slice/ownerDetailsSlice';
 
 const RestaurantHomePage = () => {
   const { encryptedId } = useParams();
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   // Get user data from the Redux store
   const user = useSelector(state => state.userSlice.user);
   
   const [restaurantData, setRestaurantData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  
   // Check if the user is a logged-in customer
   const isCustomerLoggedIn = user && user.role === 'CUSTOMER';
-
+  
   // Data Fetching Effect
   useEffect(() => {
     if (!encryptedId) {
@@ -30,11 +31,25 @@ const RestaurantHomePage = () => {
       setIsLoading(false);
       return;
     }
+    
     const fetchRestaurantData = async () => {
       try {
         const response = await axiosPublicInstance.get(`/restaurant/details/${encryptedId}`);
         Cookie.set('restaurantId', encryptedId);
         setRestaurantData(response.data);
+        
+        // ✅ Use response.data.name instead of restaurantData.name
+        console.log("Fetched restaurant data:", response.data);
+        console.log("Restaurant name:", response.data.name);
+        
+        // ✅ Dispatch with the fetched data, not the state
+        dispatch(
+          setOwnerDetails({
+            restaurantEncryptedId: encryptedId,
+            restaurantName: response.data.name,
+            // Remove RestaurantApprovalRequests if it's not defined
+          })
+        );
       } catch (err) {
         setError("Sorry, this restaurant could not be found.");
         console.error("Fetch restaurant error:", err);
@@ -42,14 +57,15 @@ const RestaurantHomePage = () => {
         setIsLoading(false);
       }
     };
+    
     fetchRestaurantData();
-  }, [encryptedId]);
-
+  }, [encryptedId, dispatch]); // Added dispatch to dependencies
+  
   // Render Logic for loading and error states
   if (isLoading) {
     return <CommonLoadingSpinner />;
   }
-
+  
   if (error || !restaurantData) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-950 text-white p-4">
@@ -59,7 +75,7 @@ const RestaurantHomePage = () => {
       </div>
     );
   }
-
+  
   return (
     <>
       <header className="bg-black/50 border-b border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
@@ -75,7 +91,7 @@ const RestaurantHomePage = () => {
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
           >
             <UserIcon size={18} />
-            {user.email}
+            {user.name} {/* Changed from user.email to user.name for consistency */}
           </Button>
         ) : (
           <Button
@@ -87,7 +103,7 @@ const RestaurantHomePage = () => {
           </Button>
         )}
       </header>
-
+      
       <div className="p-0">
         <section className="relative h-96 overflow-hidden">
           <img
@@ -103,7 +119,7 @@ const RestaurantHomePage = () => {
             </div>
           </div>
         </section>
-
+        
         <section className="p-6">
           <h2 className="text-3xl font-bold text-center text-white mb-8">What would you like to do?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">

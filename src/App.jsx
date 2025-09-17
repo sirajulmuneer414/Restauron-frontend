@@ -3,6 +3,9 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { useSelector } from "react-redux";
 import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
+import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
+import { ErrorBoundary } from "react-error-boundary";
+const UserDetailsPage = lazy(() => import("./components/admin/userManagement/UserDetailsPage"));
 
 
 const CustomerAuthPage = lazy(() => 
@@ -36,7 +39,7 @@ const RestaurantApprovalRequests = lazy(() =>
   import("./components/admin/RestaurantApprovalRequests")
 );
 const UserManagementList = lazy(() =>
-  import("./components/admin/UserManagementList")
+  import("./components/admin/userManagement/UserManagementList")
 );
 const OwnerLayoutPage = lazy(() =>
   import("./pages/owner/OwnerLayoutPage")
@@ -65,13 +68,17 @@ const CustomerLayout = lazy(() =>
 const RestaurantHomePage = lazy(() =>
   import("./components/customer/restaurant/RestaurantHomePage")
 );
-
-CustomerAuthPage
-
+const RestaurantManagementList = lazy(() =>
+  import("./components/admin/restaurantManagement/RestaurantManagementList")
+);
+const RestaurantDetailsPage = lazy(() =>
+  import("./components/admin/restaurantManagement/RestaurantDetailsPage")
+);
 
 function App() {
   const otpPermission = useSelector((state) => state.signupOption.otp);
   const user = useSelector((state) => state.userSlice.user);
+  
 
   return (
     <>
@@ -79,6 +86,20 @@ function App() {
       <Suspense fallback={<CommonLoadingSpinner />} >
 
         <Routes>
+          <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={() => {
+            
+            if(user.role === 'owner'){
+              window.location.href = '/owner/employees/list';
+            } else if(user.role === 'admin'){
+              window.location.href = '/admin/restaurants';
+            } else if(user.role === 'employee'){
+              window.location.href = '/employee/dashboard';
+            }
+            
+          }}
+          >
           <Route path="/" element={<Signup />} />
           {otpPermission ? (
             <Route path="/otpVerification" element={<OtpVerifcationPage />} />
@@ -101,17 +122,30 @@ function App() {
             <Route path="/admin" element={<AdminLayoutPage />}>
               {/* Define admin-specific routes here */}
               <Route
-                path="restaurants/requests"
+                path="restaurant/requests"
                 element={<RestaurantApprovalRequests />}
               />
               <Route
                 path="restaurant/request/:requestId"
                 element={<RestaurantRequestDetails />}
               />
+               <Route 
+                path="restaurants" 
+                element={<RestaurantManagementList />} 
+              />
+              <Route
+                path="restaurants/details/:encryptedId"
+                element={<RestaurantDetailsPage />}
+              />
               <Route
                 path="users"
                 element={<UserManagementList />}
               />
+              // In your router configuration
+            <Route 
+            path="users/detail/:userEncryptionId" 
+            element={<UserDetailsPage />} />
+
             </Route>
           ) : (
             <Route
@@ -169,6 +203,8 @@ function App() {
             
           </Route>
           <Route path="/public/login/:encryptedId" element={<CustomerAuthPage />} />
+        </ErrorBoundary>
+
         </Routes>
       </Suspense>
     </>

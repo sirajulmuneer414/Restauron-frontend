@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../axios/instances/axiosInstances';
-import { Button } from '../ui/button';
-import CommonLoadingSpinner from '../loadingAnimations/CommonLoading';
+import { axiosAdminInstance } from '../../../axios/instances/axiosInstances';
+import { Button } from '../../ui/button';
+import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 
 // go to page no 224 to continue coding 
 
@@ -173,11 +173,12 @@ function UserManagementList() {
               value={filter}
               onChange={onFilterChange}
               className="bg-black/70 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:border-amber-500"
-            >
+            > 
+              <option value="ALL">All</option>
               <option value="OWNER">Owner</option>
               <option value="EMPLOYEE">Employee</option>
               <option value="CUSTOMER">Customer</option>
-              <option value="ALL">All</option>
+            
             </select>
           </div>
 

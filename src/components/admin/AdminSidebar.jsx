@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, UtensilsCrossed, Users } from 'lucide-react';
+import { LayoutDashboard, UtensilsCrossed, Users, Building } from 'lucide-react';
 
 const AdminSidebar = () => {
   const itemBase =
@@ -66,7 +66,7 @@ const AdminSidebar = () => {
           </p>
           <ul className="space-y-1.5">
             <li>
-              <NavLink to="/admin/restaurants/requests" className={linkClasses}>
+              <NavLink to="/admin/restaurant/requests" className={linkClasses}>
                 {({ isActive }) => (
                   <>
                     <span
@@ -85,7 +85,24 @@ const AdminSidebar = () => {
                   </>
                 )}
               </NavLink>
+            </li> 
+            
+            <li>
+              <NavLink to="/admin/restaurants" className={linkClasses} end>
+                {({ isActive }) => (
+                  <>
+                    <span className={`h-5 w-1 rounded-full transition-colors ${isActive ? 'bg-amber-500' : 'bg-transparent group-hover:bg-white/20'}`} />
+                    <Building
+                      size={18}
+                      className={`transition-colors ${isActive ? 'text-amber-400' : 'text-gray-400 group-hover:text-white'}`}
+                    />
+                    <span>Restaurant Management</span>
+                  </>
+                )}
+              </NavLink>
             </li>
+
+
             <li>
               <NavLink to="/admin/users" className={linkClasses}>
                 {({ isActive }) => (

@@ -101,7 +101,7 @@ function LoginCommon() {
 
                   switch (jwtDecoded.role.toLowerCase()) {
                     case 'admin':
-                      navigate('/admin/restaurants/requests');
+                      navigate('/admin/restaurant/requests');
                       break;
                     case 'owner':
                       const ownerResponse = await axiosInstances.get(`/owner/get-restaurant-details/${jwtDecoded.userId}`);

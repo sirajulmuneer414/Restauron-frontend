@@ -69,7 +69,7 @@ function RestaurantRequestDetails() {
         // Update status locally for immediate feedback
         setDetails(prev => ({ ...prev, status: newStatus }));
         // Optionally navigate back to the list after a delay
-        setTimeout(() => navigate('/admin/restaurants/requests'), 1500);
+        setTimeout(() => navigate('/admin/restaurant/requests'), 1500);
       } else {
         setError('Failed to update status.');
       }
@@ -110,7 +110,7 @@ function RestaurantRequestDetails() {
             <p><strong className="w-32 inline-block">Owner Name:</strong> {details.ownerName}</p>
             <p><strong className="w-32 inline-block">Owner Email:</strong> {details.ownerEmail}</p>
             <p><strong className="w-32 inline-block">Owner Phone:</strong> {details.ownerPhone || 'N/A'}</p>
-            <p><strong className="w-32 inline-block">Aadhaar No:</strong> {details.adhaarNumber}</p>
+            <p><strong className="w-32 inline-block">Aadhaar No:</strong> {details.ownerAdhaarNo}</p>
 
             <div className="mt-6">
               <h3 className="text-xl font-semibold text-amber-500 border-b border-amber-500/50 pb-2 mb-2">Restaurant Information</h3>

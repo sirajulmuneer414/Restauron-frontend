@@ -565,43 +565,6 @@ function RestaurantRegistration() {
             </button>
           </div>
         </div>
-        <div className='flex flex-col items-center justify-center text-center text-white w-full'>
-          {allowAdminCode ? (
-            <div>
-              <h4>To register as an admin enter</h4>
-              <h4>The Security Code</h4>
-              <div className="flex w-full items-center gap-2 justify-center">
-                <Input
-                  type="text"
-                  placeholder="Security Code"
-                  className='focus-visible:ring-amber-500 max-w-80 min-w-80 bg-white text-black'
-                  value={adminSecurityCode}
-                  onChange={handleAdminSecurityCodeChange}
-                  maxLength={20}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className='bg-white text-black hover:text-white hover:bg-amber-500 hover:border-none'
-                  onClick={handleAdminSecurityCodeSubmit}
-                >
-                  Enter
-                </Button>
-              </div>
-              {errors.adminSecurityCode && <p className='text-red-500 text-sm mt-1'>{errors.adminSecurityCode}</p>}
-            </div>
-          ) : (
-            <div>
-              <h4>Are you registering as an Admin?</h4>
-              <Button
-                onClick={() => setAllowAdminCode(true)}
-                className='bg-white text-black hover:text-white hover:bg-amber-500 mt-4'
-              >
-                Yes
-              </Button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
