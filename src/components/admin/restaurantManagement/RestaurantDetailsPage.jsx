@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, use } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { axiosAdminInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../../components/ui/button';
 import CommonLoadingSpinner from '../../../components/loadingAnimations/CommonLoading';
 import { Building, Mail, Phone, Shield, User, MapPin, ArrowLeft, Trash2, Lock, Unlock, Edit, AlertTriangle } from 'lucide-react';
@@ -99,6 +99,7 @@ const EditRestaurantModal = ({ restaurant, isOpen, onClose, onSave }) => {
 const RestaurantDetailsPage = () => {
     const { encryptedId } = useParams();
     const navigate = useNavigate();
+    const {axiosAdminInstance} = useAxios();
 
     const [restaurant, setRestaurant] = useState(null);
     const [isLoading, setIsLoading] = useState(true);

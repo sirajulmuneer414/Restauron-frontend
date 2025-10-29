@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 // Axios and UI imports
-import { axiosEmployeeInstance } from '../../../axios/instances/axiosInstances'; // Assuming an employee-specific instance
+import { useAxios } from '../../../axios/instances/axiosInstances'; // Assuming an employee-specific instance
 import { Button } from '../../ui/button';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 import { User, Mail, Phone, Edit, ShieldAlert, X } from 'lucide-react';
@@ -32,7 +32,7 @@ const EmployeeProfilePage = () => {
   
   // State to control the visibility of the edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+  const {axiosEmployeeInstance} = useAxios(); // Assuming an employee-specific instance
   // --- Data Fetching ---
     
 

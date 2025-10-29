@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { axiosEmployeeInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 import { Lock, Shield, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
@@ -28,6 +28,7 @@ const EmployeeChangePasswordPage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const user = useSelector((state) => state.userSlice.user);
+  const {axiosEmployeeInstance} = useAxios(); 
 
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     setSubmitting(true);

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { axiosPublicInstance } from '../../axios/instances/axiosInstances';
+import { useAxios } from '../../axios/instances/axiosInstances';
 import { Button } from '../../components/ui/button';
 import { User, Mail, Lock, ShieldCheck, RefreshCw, Phone, Store } from 'lucide-react';
 import PasswordInput from '../../components/ui/PasswordInput';
@@ -11,6 +11,9 @@ import Cookie from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { setUserDetails } from '../../redux/slice/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
+
+ // Use 'public' instance for public endpoints
 
 const GOOGLE_CLIENT_ID = "152323379317-tilaursisc0rgu4riju2qd4u6jdri3i1.apps.googleusercontent.com";
 
@@ -48,6 +51,7 @@ const FormInput = ({ icon: Icon, name, type, placeholder }) => (
 );
 
 const CustomerAuthPage = () => {
+  const {axiosPublicInstance} = useAxios();
   const [activeTab, setActiveTab] = useState('login');
   const navigate = useNavigate();
   const { encryptedId } = useParams();
@@ -60,22 +64,29 @@ const CustomerAuthPage = () => {
   const restaurantName = useSelector((state) => state.ownerDetailsSlice.restaurantName);
 
 
-  const handleAuthSuccess = (token) => {
-    Cookie.set('jwtToken', token);
+  const handleAuthSuccess = (token, refreshToken, specialId) => {
+
+    Cookie.set('accessToken', token);
+    Cookie.set('refreshToken', refreshToken, { expires: 7 }); 
+    Cookie.set("customerId",specialId, { expires: 7 });
+
     const decodedToken = jwtDecode(token);
     dispatch(setUserDetails({
       name: decodedToken.username,
       email: decodedToken.email,
       role: decodedToken.role,
       userId: decodedToken.userId,
+      status: decodedToken.status,
     }));
     navigate(`/restaurant/${encryptedId}/home`);
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      const response = await axiosPublicInstance.post('/auth/google', { token: credentialResponse.credential });
-      handleAuthSuccess(response.data.token);
+      const response = await axiosPublicInstance.post('/auth/google', { token: credentialResponse.credential },{
+        headers:  { 'X-Restaurant-Id': encryptedId }
+      });
+      handleAuthSuccess(response.data.token, response.data.refreshToken, response.data.specialId);
     } catch (error) {
       toast.error('Google login failed. Please try again.');
     }
@@ -96,16 +107,20 @@ const CustomerAuthPage = () => {
     setErrors({});
     if (activeTab === 'login') {
       try {
-        Cookie.remove('jwtToken');
+        console.log("In login try");
         const response = await axiosPublicInstance.post('/auth/login', values);
-        handleAuthSuccess(response.data.token);
+        console.log("Login response:", response);
+        Cookie.remove('accessToken');
+        Cookie.remove('refreshToken');
+        Cookie.remove('customerId');
+        console.log("Old cookies removed");
+        handleAuthSuccess(response.data.token, response.data.refreshToken, response.data.specialId);
       } catch (error) {
         setErrors({ api: error.response?.data?.message || 'Login failed.' });
       }
     } else {
       if (!isOtpStep) {
         try {
-          Cookie.remove('jwtToken');
           await axiosPublicInstance.post('/auth/send-otp', { email: values.email });
           setRegistrationData(values);
           setIsOtpStep(true);
@@ -120,7 +135,7 @@ const CustomerAuthPage = () => {
           const response = await axiosPublicInstance.post('/auth/register-verify', finalPayload, {
             headers: { 'X-Restaurant-Id': encryptedId }
           });
-          handleAuthSuccess(response.data.token);
+          handleAuthSuccess(response.data.token, response.data.refreshToken, response.data.specialId);
         } catch (error) {
           setErrors({ api: error.response?.data?.message || 'OTP verification failed.' });
         }
@@ -316,7 +331,7 @@ const CustomerAuthPage = () => {
                     theme="filled_blue"
                     shape="rectangular"
                     size="large" 
-                    width="100%"
+                    width="280"
                   />
                 </div>
               </>

@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 // Axios and Firebase imports
-import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import imageStorage from '../../../firebase/firebaseConfig'; // Adjust path
@@ -29,7 +29,7 @@ const EditEmployeeSchema = Yup.object().shape({
 const EmployeeIndividualDetails = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
-
+  const {axiosOwnerInstance} = useAxios(); // Assuming an owner-specific instance
   const [employeeData, setEmployeeData] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [error, setError] = useState(null);

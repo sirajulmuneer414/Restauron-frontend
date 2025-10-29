@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Phone, CreditCard, Eye, Search, Filter, List, Grid } from 'lucide-react';
-import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 
 function EmployeeManagementList() {
   const navigate = useNavigate();
-
+  const {axiosOwnerInstance} = useAxios(); // Assuming an owner-specific instance
   // Data
   const [employeeList, setEmployeeList] = useState([]);
   const [error, setError] = useState(null);

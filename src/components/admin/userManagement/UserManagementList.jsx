@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 
@@ -27,7 +27,7 @@ function UserManagementList() {
   const [filter, setFilter] = useState('PENDING');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-
+  const {axiosAdminInstance} = useAxios();  
   // Debounce search
   useEffect(() => {
     const t = setTimeout(() => {

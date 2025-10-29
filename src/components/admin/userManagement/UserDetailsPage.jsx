@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../../components/ui/button';
 import CommonLoadingSpinner from '../../../components/loadingAnimations/CommonLoading';
 import { User, Mail, Phone, Shield, BarChart, Tag, ArrowLeft, Trash2, Lock, Unlock, Edit, AlertTriangle } from 'lucide-react';
@@ -80,7 +80,7 @@ const UserDetailsPage = () => {
   const [error, setError] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
+  const {axiosAdminInstance} = useAxios();
   // --- Data Fetching ---
   const fetchUserDetails = useCallback(async () => {
     setIsLoading(true);

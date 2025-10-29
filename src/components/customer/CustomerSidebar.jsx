@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Home, Menu as MenuIcon, Phone, ShoppingCart, LogIn, User as UserIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { axiosPublicInstance } from '../../axios/instances/axiosInstances'; // Ensure this path is correct
+import { useAxios } from '../../axios/instances/axiosInstances'; // Ensure this path is correct
 
 const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
   const { encryptedId } = useParams();
@@ -13,7 +13,7 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
   
   const [restaurantName, setRestaurantName] = useState("Restaurant");
   const [isLoading, setIsLoading] = useState(true);
-
+  const {axiosPublicInstance} = useAxios(); // Use 'public' instance for public endpoints
   // Check if a customer is logged in
   const isCustomerLoggedIn = user && user.role === 'CUSTOMER';
   
@@ -45,13 +45,16 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
   }, [encryptedId, user, isCustomerLoggedIn]);
 
   const navItems = [
-    { name: 'Home', icon: Home, path: `/restaurant/${encryptedId}` }, // Adjusted path
+    { name: 'Home', icon: Home, path: `/restaurant/${encryptedId}/home` }, // Adjusted path
     { name: 'Menu', icon: MenuIcon, path: `/restaurant/${encryptedId}/menu` },
     { name: 'Contact', icon: Phone, path: `/restaurant/${encryptedId}/contact` },
     { name: 'Cart', icon: ShoppingCart, path: `/restaurant/${encryptedId}/cart` },
   ];
 
-  const NavItem = ({ to, icon: Icon, children }) => (
+  const NavItem = ({ to, icon: Icon, children }) => {
+    if(user?.status === "NONACTIVE"){return}
+    
+    return (
     <NavLink
       to={to}
       end={to.split('/').length <= 3} // Use 'end' prop only for the base restaurant route
@@ -66,7 +69,8 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
       <Icon size={20} className="flex-shrink-0" />
       {!isCollapsed && <span className="font-medium whitespace-nowrap">{children}</span>}
     </NavLink>
-  );
+  )
+};
 
   return (
     <aside
@@ -97,8 +101,9 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
       </div>
       
       <nav className="flex-grow px-4 py-6 space-y-2">
+        
         {navItems.map((item) => (
-          <NavItem key={item.name} to={item.path} icon={item.icon}>
+          <NavItem key={item.name} to={item.path} icon={item.icon} >
             {item.name}
           </NavItem>
         ))}
@@ -111,7 +116,7 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
             className="w-full flex items-center gap-4 px-4 py-3 rounded-lg bg-yellow-500/10 hover:bg-yellow-500 text-yellow-400 hover:text-black border border-yellow-500/30 hover:border-yellow-500 transition-colors duration-200 font-semibold"
           >
             <UserIcon size={20} className="flex-shrink-0" />
-            {!isCollapsed && <span className="whitespace-nowrap">My Profile</span>}
+            {!isCollapsed && <span className="whitespace-nowrap">{user ? user.name : "My profile"}</span>}
           </NavLink>
         ) : (
           <NavLink

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../axios/instances/axiosInstances';
+import { useAxios } from '../../axios/instances/axiosInstances';
 import { Button } from '../ui/button';
 import CommonLoadingSpinner from '../loadingAnimations/CommonLoading';
 
@@ -15,7 +15,7 @@ function RestaurantRequestDetails() {
   const [isRejectBtnPressed, setIsRejectBtnPressed] = useState(false);
   const [isPendingBtnPressed, setIsPendingBtnPressed] = useState(false);
   const dialogRef = useRef(null);
-
+const { axiosAdminInstance} = useAxios();
   const fetchRequestDetails = useCallback(async () => {
     setIsLoading(true);
     try {

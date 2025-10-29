@@ -9,7 +9,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun, // Example icon for a menu item
-  DollarSign // Example icon
+  DollarSign, // Example icon
+  Table,
+  ChartColumnBig,
+  UserPen,
+  ListOrdered 
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
@@ -73,11 +77,36 @@ const OwnerSidebar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/owner/employees" className={linkClasses}>
-              <Users size={20} className="flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium">Employees</span>}
+            <NavLink to="/owner/customers" className={linkClasses}>
+              <UserPen size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Customer Management</span>}
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/owner/employees/list" className={linkClasses}>
+              <Users size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Employees Management</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/owner/tables" className={linkClasses}>
+              <Table size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Table Management</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/owner/category" className={linkClasses}>
+              <ChartColumnBig size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Category Management</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/owner/settings" className={linkClasses}>
+              <Settings size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Settings</span>}
+            </NavLink>
+          </li>
+          
         </ul>
 
         {/* Divider */}

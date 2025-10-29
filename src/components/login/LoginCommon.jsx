@@ -7,7 +7,7 @@ import { Input } from '../ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import LogoGolden from '../../assets/logo-golden.png';
 import Table from '../../assets/login-back.jpg';
-import { axiosInstances, axiosLoginInstance } from '../../axios/instances/axiosInstances';
+import { useAxios } from '../../axios/instances/axiosInstances';
 import { setSignupOption } from '../../redux/slice/signupOptionSlice';
 import Cookie from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
@@ -21,6 +21,7 @@ function LoginCommon() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const {axiosLoginInstance, axiosInstances} = useAxios(); // Use 'login' instance
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -88,14 +89,17 @@ function LoginCommon() {
 
                 if (response.status === 200) {
                   const jwtToken = response.data.token;
+                  const refreshToken = response.data.refreshToken;
                   const jwtDecoded = jwtDecode(jwtToken);
-                  Cookie.set('jwtToken', jwtToken);
+                  Cookie.set('accessToken', jwtToken,{ expires: 1/48 });
+                  Cookie.set('refreshToken', refreshToken, { expires: 7 });
                   dispatch(
                     setUserDetails({
                       name: jwtDecoded.username,
                       email: jwtDecoded.email,
                       role: jwtDecoded.role,
                       userId: jwtDecoded.userId,
+                      status: jwtDecoded.status,
                     })
                   );
 

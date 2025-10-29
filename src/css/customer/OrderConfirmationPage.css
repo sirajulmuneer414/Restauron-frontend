@@ -1,0 +1,156 @@
+/* ==========================================================================
+   Improved Dark Theme for React Datepicker
+   ========================================================================== */
+
+/* --- Main Calendar Container --- */
+.react-datepicker-custom .react-datepicker {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    background-color: #1F2937; /* Darker Gray: gray-800 */
+    border: 1px solid #4B5563; /* Gray: gray-600 */
+    border-radius: 0.75rem; /* rounded-xl */
+    color: #F9FAFB; /* Off-white: gray-50 */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Popper Arrow --- */
+.react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle::before,
+.react-datepicker-popper[data-placement^="bottom"] .react-datepicker__triangle::after {
+    border-bottom-color: #1F2937 !important;
+}
+.react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle::before,
+.react-datepicker-popper[data-placement^="top"] .react-datepicker__triangle::after {
+    border-top-color: #1F2937 !important;
+}
+
+
+/* --- Header (Month and Navigation) --- */
+.react-datepicker-custom .react-datepicker__header {
+    background-color: #1F2937;
+    border-bottom: 1px solid #4B5563;
+    padding-top: 12px;
+}
+
+.react-datepicker-custom .react-datepicker__current-month {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #F9FAFB;
+}
+
+/* --- Navigation Arrows --- */
+.react-datepicker-custom .react-datepicker__navigation {
+    top: 7px;
+}
+.react-datepicker-custom .react-datepicker__navigation-icon::before {
+    border-color: #D1D5DB; /* Gray: gray-300 */
+    border-width: 2px 2px 0 0;
+}
+.react-datepicker-custom .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+    border-color: #FBBF24; /* Yellow: amber-400 */
+}
+
+
+/* --- Day Names --- */
+.react-datepicker-custom .react-datepicker__day-name {
+    color: #9CA3AF; /* Gray: gray-400 */
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+/* --- Day Styling (The number cells) --- */
+.react-datepicker-custom .react-datepicker__day {
+    color: #111827; /* Bright white for pickable dates */
+    transition: all 0.2s ease-in-out;
+    border-radius: 50%;
+}
+
+.react-datepicker-custom .react-datepicker__day:hover {
+    background-color: #374151; /* Gray: gray-700 */
+    color: #F9FAFB;
+    transform: scale(1.05);
+    border-radius: 50%;
+}
+
+/* --- Selected Day --- */
+.react-datepicker-custom .react-datepicker__day--selected,
+.react-datepicker-custom .react-datepicker__day--keyboard-selected {
+    background-color: #FBBF24; /* Yellow: amber-400 */
+    color: #111827 !important; /* Black text for selected date */
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+/* --- Today's Date (but not selected) --- */
+.react-datepicker-custom .react-datepicker__day--today {
+    font-weight: 700;
+    border: 1px solid #FBBF24;
+    border-radius: 50%;
+}
+
+/* --- Disabled Day --- */
+.react-datepicker-custom .react-datepicker__day--disabled {
+    color: #4B5563;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.react-datepicker-custom .react-datepicker__day--disabled:hover {
+    background-color: transparent;
+    transform: none;
+}
+
+
+/* ==========================================================================
+   Time Picker Styles
+   ========================================================================== */
+
+.react-datepicker-custom .react-datepicker__time-container {
+    border-left: 1px solid #4B5563;
+    width: 100px; /* Wider time list */
+}
+
+.react-datepicker-custom .react-datepicker__time-container .react-datepicker__header {
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: #F9FAFB;
+}
+
+.react-datepicker-custom .react-datepicker__time-list {
+    padding-right: 4px; /* Space for scrollbar */
+}
+
+.react-datepicker-custom .react-datepicker__time-list-item {
+    color: #111827; /* Bright white for pickable times */
+    background-color: transparent !important;
+    border-radius: 0.375rem; /* rounded-md */
+    transition: background-color 0.2s ease;
+}
+
+.react-datepicker-custom .react-datepicker__time-list-item:hover {
+    background-color: #374151 !important; /* Gray: gray-700 */
+     color: #F9FAFB !important;
+}
+
+.react-datepicker-custom .react-datepicker__time-list-item--selected {
+    background-color: #FBBF24 !important;
+    color: #111827 !important; /* Black text for selected time */
+    font-weight: 700;
+}
+
+/* --- Custom Scrollbar for Time List --- */
+.react-datepicker-custom .react-datepicker__time-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.react-datepicker-custom .react-datepicker__time-list::-webkit-scrollbar-track {
+    background: #1F2937; /* Background of the scrollbar track */
+}
+
+.react-datepicker-custom .react-datepicker__time-list::-webkit-scrollbar-thumb {
+    background-color: #4B5563; /* The scrollbar itself */
+    border-radius: 20px;
+    border: 3px solid #1F2937;
+}
+
+.react-datepicker-custom .react-datepicker__time-list::-webkit-scrollbar-thumb:hover {
+    background-color: #6B7280;
+}
+

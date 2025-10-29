@@ -6,6 +6,7 @@ import { ArrowLeft, Shield } from 'lucide-react';
 import{ Button } from '../ui/button'
 import { resetAllowOtp, resetOtpEmail } from '../../redux/slice/signupOptionSlice';
 import toast from 'react-hot-toast';
+// Assuming a signup-specific instance
 
 function OtpVerification() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);

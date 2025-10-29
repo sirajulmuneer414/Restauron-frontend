@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../axios/instances/axiosInstances';
+import { useAxios } from '../../axios/instances/axiosInstances';
 import { Button } from '../ui/button';
 import CommonLoadingSpinner from '../loadingAnimations/CommonLoading';
 
@@ -10,6 +10,7 @@ function RestaurantApprovalRequests() {
   // Data
   const [restaurantRequests, setRestaurantRequests] = useState([]);
   const [error, setError] = useState(null);
+  const { axiosAdminInstance } = useAxios();
 
   // Loading states
   const [isLoading, setIsLoading] = useState(true);

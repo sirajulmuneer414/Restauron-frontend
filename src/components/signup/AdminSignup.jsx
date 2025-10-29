@@ -3,13 +3,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import adminBackground from '../../assets/adminBackground.jpg';
 import { Button } from '../ui/button';
-import { axiosSignupInstance } from '../../axios/instances/axiosInstances';
+import { useAxios } from '../../axios/instances/axiosInstances';
+
 import { setAllowOtp, setSignupOption, setOtpEmail } from '../../redux/slice/signupOptionSlice';
 import { setAdminPageAccess } from '../../redux/slice/specialPermissions';
 import toast from 'react-hot-toast';
 
+ // Assuming a signup-specific instance
+
 function AdminSignup() {
- 
+ const { axiosSignupInstance } = useAxios();
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

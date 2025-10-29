@@ -1,140 +1,148 @@
-import axios from "axios";
-import Cookies from "js-cookie";
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
-export const axiosInstances = axios.create({
-    baseURL: "http://localhost:8081",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-});
+const BASE_URL = "http://localhost:8081";
 
-export const axiosSignupInstance = axios.create({
-    baseURL: "http://localhost:8081/registration",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-});
+// --- Interceptor Logic ---
+const createAuthResponseInterceptor = (navigate) => async (error) => {
+    const originalRequest = error.config;
 
-export const axiosOwnerInstance = axios.create({
-    baseURL: "http://localhost:8081/owner",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-
-    },
-});
-
-export const axiosPublicInstance = axios.create({
-    baseURL: "http://localhost:8081/public",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-});
+    if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        const refreshToken = Cookies.get('refreshToken');
+        if (!refreshToken) {
+            const isCustomerRequest = originalRequest.baseURL?.includes('/customer');
+            if (isCustomerRequest) {
+                const encryptedId = Cookies.get('restaurantId');
+                if (encryptedId) {
+                    if (navigate) navigate(`/public/login/${encryptedId}`);
+                    else window.location.href = `/public/login/${encryptedId}`;
+                    return Promise.reject(error);
+                }
 
 
-export const axiosLoginInstance = axios.create({
-    baseURL: "http://localhost:8081/auth/login",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-});
+            }
+            if (navigate) navigate('/login');
+            else window.location.href = '/login';
+            return Promise.reject(error);
+        }
 
-export const axiosAdminInstance = axios.create({
-    baseURL: "http://localhost:8081/admin",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-    withCredentials: true
-});
+        try {
+            const response = await axios.post(`${BASE_URL}/auth/refresh-token`, { refreshToken });
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+            
+            Cookies.set('accessToken', newAccessToken, { expires: 1/48 });
+            if (newRefreshToken) {
+                Cookies.set('refreshToken', newRefreshToken, { expires: 7 });
+            }
 
-export const axiosEmployeeInstance = axios.create({
-    baseURL: "http://localhost:8081/employee",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-    withCredentials: true
-});
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return axios(originalRequest);
 
-export const axiosCustomerInstance = axios.create({
-    baseURL: "http://localhost:8081/customer",
-    headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-    },
-    withCredentials: true
-});
+        } catch (refreshError) {
+            console.error("Refresh token failed:", refreshError);
+            Cookies.remove('accessToken');
+            Cookies.remove('refreshToken');
+            
+            const isCustomerRequest = originalRequest.baseURL?.includes('/customer');
+            if (isCustomerRequest) {
+                const encryptedId = Cookies.get('restaurantId');
+                if (encryptedId) {
+                    if (navigate) navigate(`/public/login/${encryptedId}`);
+                    else window.location.href = `/public/login/${encryptedId}`;
+                } else {
+                    if (navigate) navigate('/login');
+                    else window.location.href = '/login';
+                }
+            } else {
+                if (navigate) navigate('/login');
+                else window.location.href = '/login';
+            }
+            
+            return Promise.reject(refreshError);
+        }
+    }
+    return Promise.reject(error);
+};
 
-
-axiosOwnerInstance.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
-    const restaruantId = Cookies.get("restaurantId");
-
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`;
+/**
+ * Request interceptor to add the JWT token and Restaurant ID to headers.
+ * Now includes '/customer' in the check for the restaurant ID.
+ */
+const authRequestInterceptor = (config) => {
+    const accessToken = Cookies.get("accessToken");
+    if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
     }
     
-    if(restaruantId) {
-        config.headers["X-Restaurant-Id"] = restaruantId;
-    }
+    // Check if the request is for owner, employee, or customer endpoints
+   
+        const restaurantId = Cookies.get("restaurantId");
+        if (restaurantId) {
+            config.headers["X-Restaurant-Id"] = restaurantId;
+        }
 
-
+        const customerId = Cookies.get("customerId");
+        if (customerId) {
+            config.headers["X-Customer-Id"] = customerId;
+        }
+    
     return config;
-})
-axiosPublicInstance.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
-    const restaruantId = Cookies.get("restaurantId");
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    if(restaruantId) {
-        config.headers["X-Restaurant-Id"] = restaruantId;
-    }
-    return config;
-})
-
-axiosInstances.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
-
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-})
+};
 
 
-axiosAdminInstance.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
+// --- Create instances with fallback navigation ---
+const createAuthInstance = (baseURL, navigate = null) => {
+    const instance = axios.create({ 
+        baseURL, 
+        headers: { "Content-Type": "application/json" } 
+    });
+    instance.interceptors.request.use(authRequestInterceptor);
+    instance.interceptors.response.use(
+        response => response, 
+        createAuthResponseInterceptor(navigate)
+    );
+    return instance;
+};
 
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
+// --- Direct Export Instances (for non-component usage) ---
 
-    return config;
-})
+export const axiosLoginInstance = axios.create({ 
+    baseURL: `${BASE_URL}/auth/login`,
+    headers: { "Content-Type": "application/json" }
+});
 
-axiosEmployeeInstance.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
-    const restaruantId = Cookies.get("restaurantId");
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    if(restaruantId) {
-        config.headers["X-Restaurant-Id"] = restaruantId;
-    }
-    return config;
-})
+export const axiosSignupInstance = axios.create({ 
+    baseURL: `${BASE_URL}/registration`,
+    headers: { "Content-Type": "application/json" }
+});
 
-axiosCustomerInstance.interceptors.request.use((config) => {
-    const token = Cookies.get("jwtToken");
+// The createAuthInstance factory now correctly applies the modified interceptor
+export const axiosOwnerInstance = createAuthInstance(`${BASE_URL}/owner`);
+export const axiosAdminInstance = createAuthInstance(`${BASE_URL}/admin`);
+export const axiosEmployeeInstance = createAuthInstance(`${BASE_URL}/employee`);
+export const axiosCustomerInstance = createAuthInstance(`${BASE_URL}/customer`);
+export const axiosInstances = createAuthInstance(BASE_URL);
 
-    if(token) {
-        config.headers.Authorization = `Bearer ${token}`
-    }
-    return config;
-})
+
+// --- Hook for Components (with enhanced navigation) ---
+export const useAxios = () => {
+    const navigate = useNavigate();
+
+    const instances = useMemo(() => ({
+        axiosPublicInstance: createAuthInstance(`${BASE_URL}/public`, navigate),
+        axiosLoginInstance,
+        axiosSignupInstance,
+        axiosOwnerInstance: createAuthInstance(`${BASE_URL}/owner`, navigate),
+        axiosAdminInstance: createAuthInstance(`${BASE_URL}/admin`, navigate),
+        axiosEmployeeInstance: createAuthInstance(`${BASE_URL}/employee`, navigate),
+        axiosCustomerInstance: createAuthInstance(`${BASE_URL}/customer`, navigate),
+        axiosInstances: createAuthInstance(BASE_URL, navigate),
+    }), [navigate]);
+
+    return instances;
+};
+

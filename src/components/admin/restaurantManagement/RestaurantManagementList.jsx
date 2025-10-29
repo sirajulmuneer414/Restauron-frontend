@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { axiosAdminInstance } from '../../../axios/instances/axiosInstances';
+import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../../components/ui/button';
 import { Search, SlidersHorizontal, List } from 'lucide-react';
 
@@ -18,6 +18,7 @@ const RestaurantManagementList = () => {
     const [filter, setFilter] = useState('ALL');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const {axiosAdminInstance} = useAxios();
 
     // Debounce search input
     useEffect(() => {
