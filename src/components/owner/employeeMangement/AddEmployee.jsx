@@ -6,19 +6,15 @@ import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 import { User, Mail, Phone, CreditCard, Lock, AtSign, FileImage, UploadCloud } from 'lucide-react';
 
-// Import Firebase storage functions
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-import imageStorage from '../../../firebase/firebaseConfig'; // Adjust the import path to your firebase config
 
 // --- Validation Schema ---
-// Now includes validation for the adhaarImage file
+// Now includes validation for the aadhaarImage file
 const AddEmployeeSchema = Yup.object().shape({
   name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Name is required'),
   personalEmail: Yup.string().email('Invalid email').required('Personal email is required'),
   phone: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Phone is required'),
-  adhaarNo: Yup.string().matches(/^[0-9]{12}$/, 'Must be 12 digits').required('Aadhaar number is required'),
-  adhaarImage: Yup.mixed()
+  aadhaarNo: Yup.string().matches(/^[0-9]{12}$/, 'Must be 12 digits').required('Aadhaar number is required'),
+  aadhaarImage: Yup.mixed()
     .required('Aadhaar photo is required')
     .test('fileSize', 'File is too large (max 2MB)', (value) => value && value.size <= 2 * 1024 * 1024)
     .test('fileType', 'Unsupported file format', (value) => value && ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type)),
@@ -52,20 +48,11 @@ const AddEmployee = () => {
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         setSubmitting(true);
         try {
-            // 1. Upload Aadhaar Image to Firebase
-            const adhaarImageRef = ref(imageStorage, `employee_adhaar_images/${uuidv4()}`);
-            await uploadBytes(adhaarImageRef, values.adhaarImage);
-            const adhaarPhotoUrl = await getDownloadURL(adhaarImageRef);
+        
 
-            // 2. Prepare the final data payload for your backend
-            const finalPayload = {
-                ...values,
-                adhaarPhoto: adhaarPhotoUrl, // Replace the file object with the URL
-            };
-            delete finalPayload.adhaarImage; // Clean up the file object before sending
-
-            // 3. Submit the complete data to your backend
-            const response = await axiosOwnerInstance.post('/employees/add', finalPayload);
+            const response = await axiosOwnerInstance.post('/employees/add', values, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
 
             if (response.status === 201) {
                 navigate('/owner/employees/list');
@@ -102,8 +89,8 @@ const AddEmployee = () => {
                         name: '',
                         personalEmail: '',
                         phone: '',
-                        adhaarNo: '',
-                        adhaarImage: null, // Field for the file object
+                        aadhaarNo: '',
+                        aadhaarImage: null, // Field for the file object
                         companyEmail: '',
                         generatedPassword: '',
                     }}
@@ -117,26 +104,26 @@ const AddEmployee = () => {
                             <FormInput icon={User} name="name" type="text" placeholder="Full Name" />
                             <FormInput icon={Mail} name="personalEmail" type="email" placeholder="Employee's Personal Email" />
                             <FormInput icon={Phone} name="phone" type="tel" placeholder="10-digit Phone Number" />
-                            <FormInput icon={CreditCard} name="adhaarNo" type="text" placeholder="12-digit Aadhaar Number" />
+                            <FormInput icon={CreditCard} name="aadhaarNo" type="text" placeholder="12-digit Aadhaar Number" />
 
                             {/* Aadhaar Photo Upload Field */}
                             <div>
-                                <label htmlFor="adhaarImage" className="block text-sm font-medium text-gray-300 mb-2">Aadhaar Photo</label>
+                                <label htmlFor="aadhaarImage" className="block text-sm font-medium text-gray-300 mb-2">Aadhaar Photo</label>
                                 <div className="mt-1 flex items-center gap-4">
                                     <div className="w-full">
                                         <input
-                                            id="adhaarImage"
-                                            name="adhaarImage"
+                                            id="aadhaarImage"
+                                            name="aadhaarImage"
                                             type="file"
                                             accept="image/png, image/jpeg, image/jpg"
                                             onChange={(event) => {
                                                 const file = event.currentTarget.files[0];
-                                                setFieldValue('adhaarImage', file);
+                                                setFieldValue('aadhaarImage', file);
                                                 setImagePreview(file ? URL.createObjectURL(file) : null);
                                             }}
                                             className="hidden"
                                         />
-                                        <label htmlFor="adhaarImage" className="cursor-pointer flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-yellow-500 transition-colors">
+                                        <label htmlFor="aadhaarImage" className="cursor-pointer flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-yellow-500 transition-colors">
                                             <div className="text-center">
                                                 <UploadCloud className="mx-auto h-8 w-8 text-gray-500" />
                                                 <p className="mt-1 text-sm text-gray-400">Click to upload or drag and drop</p>
@@ -150,7 +137,7 @@ const AddEmployee = () => {
                                         </div>
                                     )}
                                 </div>
-                                <ErrorMessage name="adhaarImage" component="div" className="text-red-400 text-sm mt-1" />
+                                <ErrorMessage name="aadhaarImage" component="div" className="text-red-400 text-sm mt-1" />
                             </div>
 
                             {/* Generated Credentials Preview */}

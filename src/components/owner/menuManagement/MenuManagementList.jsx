@@ -5,47 +5,8 @@ import { PlusCircle, Search, Eye } from 'lucide-react';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import Cookie from 'js-cookie';
 import { Button } from '../../ui/button';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { v4 as uuidv4 } from 'uuid';
-import imageStorage from '../../../firebase/firebaseConfig';
 
  // Assuming an owner-specific instance
-
-// Real Firebase image upload function
-const uploadImageToFirebase = (file, folderName, setProgress) => {
-    return new Promise((resolve, reject) => {
-        
-        
-        // Create a unique filename using UUID
-        const fileExtension = file.name.split('.').pop();
-        const uniqueFileName = `${uuidv4()}.${fileExtension}`;
-        
-        const storageRef = ref(imageStorage, `${folderName}/${uniqueFileName}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                // Update progress
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                if (setProgress) {
-                    setProgress(Math.round(progress));
-                }
-            },
-            (error) => {
-                // Handle unsuccessful uploads
-                console.error("Firebase upload failed:", error);
-                reject(error);
-            },
-            () => {
-                // Handle successful uploads on complete
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                    resolve(downloadURL);
-                });
-            }
-        );
-    });
-};
-
 
 // --- Pagination Component (Embedded for simplicity) ---
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
@@ -116,33 +77,49 @@ function CreateMenuItemModal({ isOpen, onClose, categories, onSuccess }) {
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError(null);
-        setUploadProgress(0);
-        
-        const restaurantId = Cookie.get("restaurantId");
-        const folderName = restaurantName ? restaurantName.replace(/\s+/g, '_') : 'general-uploads';
+const handleSubmit = async (e) => {
+    console.log('Submitting form with data:', formData, 'and imageFile:', imageFile);
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setUploadProgress(0);
 
-        try {
-            let imageUrl = null;
-            if (imageFile) {
-                imageUrl = await uploadImageToFirebase(imageFile, folderName, setUploadProgress);
-            }
-
-            const payload = { ...formData, price: parseFloat(formData.price), imageUrl };
-            await axiosOwnerInstance.post('/menu/create', payload);
-            
-            onSuccess();
-            onClose();
-        } catch (err) {
-            setError(err?.response?.data?.message || "Failed to create item. Please check your inputs.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
     
+    const folderName = restaurantName ? restaurantName.replace(/\s+/g, '_') : 'general-uploads';
+
+    try {
+        // Build FormData
+        const formDataToSend = new FormData();
+        formDataToSend.append("name", formData.name);
+        formDataToSend.append("description", formData.description);
+        formDataToSend.append("price", parseFloat(formData.price));
+        formDataToSend.append("isVegetarian", formData.isVegetarian);
+        formDataToSend.append("categoryEncryptedId", formData.categoryEncryptedId);
+        if (imageFile) formDataToSend.append("imageFile", imageFile);
+
+
+        // Do NOT set Content-Type header manually; browser will handle boundary!
+        await axiosOwnerInstance.post('/menu/create', formDataToSend,
+             {
+            onUploadProgress: (progressEvent) => {
+                if (imageFile) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted);
+                }
+            }
+        }
+    );
+
+        onSuccess();
+        onClose();
+    } catch (err) {
+        console.error('Error creating menu item:', err);
+        setError(err?.response?.data?.message || "Failed to create item. Please check your inputs.");
+    } finally {
+        setIsLoading(false);
+    }
+};
+
     if (!isOpen) return null;
 
     return (

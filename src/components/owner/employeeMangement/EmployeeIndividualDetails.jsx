@@ -3,11 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
-// Axios and Firebase imports
 import { useAxios } from '../../../axios/instances/axiosInstances';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
-import imageStorage from '../../../firebase/firebaseConfig'; // Adjust path
 
 // UI and Icon imports
 import { Button } from '../../ui/button';
@@ -71,18 +67,13 @@ const EmployeeIndividualDetails = () => {
     setSubmitting(true);
     setError(null);
     try {
-      let finalAdhaarPhotoUrl = values.adhaarPhoto;
-      if (values.adhaarImageFile) {
-        const imageRef = ref(imageStorage, `employee_adhaar_images/${uuidv4()}`);
-        await uploadBytes(imageRef, values.adhaarImageFile);
-        finalAdhaarPhotoUrl = await getDownloadURL(imageRef);
-      }
+    
       const payload = {
         name: values.name,
         personalEmail: values.personalEmail,
         phone: values.phone,
         adhaarNo: values.adhaarNo,
-        adhaarPhoto: finalAdhaarPhotoUrl,
+        adhaarPhoto: values.adhaarImageFile ? values.adhaarImageFile : null,
       };
       await axiosOwnerInstance.put(`/employees/update/${employeeId}`, payload);
       navigate('/owner/employees/list');

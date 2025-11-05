@@ -4,26 +4,8 @@ import { useSelector } from 'react-redux';
 import { Edit, Trash, ToggleLeft, ToggleRight, AlertTriangle, Leaf, Drumstick } from 'lucide-react';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import imageStorage from '../../../firebase/firebaseConfig'; // Your Firebase storage instance
-import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
- // Assuming an owner-specific instance
 
-// --- Helper: Firebase Image Upload ---
-const uploadImageToFirebase = (file, folderName, setProgress) => {
-    return new Promise((resolve, reject) => {
-        const uniqueFileName = `${uuidv4()}.${file.name.split('.').pop()}`;
-        const storageRef = ref(imageStorage, `${folderName}/${uniqueFileName}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        uploadTask.on('state_changed',
-            (snapshot) => setProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)),
-            (error) => reject(error),
-            () => getDownloadURL(uploadTask.snapshot.ref).then(resolve)
-        );
-    });
-};
 
 // --- Helper: Confirmation Modal ---
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, isLoading }) => {
@@ -93,10 +75,6 @@ const EditMenuItemModal = ({ isOpen, onClose, item, categories, onSaveSuccess })
         const folderName = restaurantName.replace(/\s+/g, '_');
         
         try {
-            let imageUrl = item.imageUrl;
-            if (imageFile) {
-                imageUrl = await uploadImageToFirebase(imageFile, folderName, setProgress);
-            }
             
             const payload = {
                 name: formData.name,
@@ -104,13 +82,15 @@ const EditMenuItemModal = ({ isOpen, onClose, item, categories, onSaveSuccess })
                 price: parseFloat(formData.price),
                 isVegetarian: formData.isVegetarian,
                 categoryEncryptedId: formData.categoryEncryptedId,
-                imageUrl
+                imageFile: imageFile ? imageFile : null
             };
 
             console.log('Payload for update:', payload);
             
             // Simplified API call
-            await axiosOwnerInstance.put(`/menu/update/${item.encryptedId}`, payload);
+            await axiosOwnerInstance.put(`/menu/update/${item.encryptedId}`, payload, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
             
             toast.success("Item updated successfully!");
             onSaveSuccess();
