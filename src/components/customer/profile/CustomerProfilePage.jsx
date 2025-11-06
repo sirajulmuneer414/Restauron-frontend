@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useAxios } from '../../../axios/instances/axiosInstances';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { resetUserDetails } from '../../../redux/slice/userSlice';
 import toast from 'react-hot-toast';
 import { User, Edit, Camera, LogOut, Trash2, Mail, Phone } from 'lucide-react';
-import imageStorage from '../../../firebase/firebaseConfig';
 
 const CustomerProfilePage = () => {
     const { axiosCustomerInstance } = useAxios();
@@ -64,12 +62,7 @@ const CustomerProfilePage = () => {
         }
     };
 
-    const uploadProfilePicture = async () => {
-        if (!imageUpload) return null;
-        const imageRef = ref(imageStorage, `profile-pictures/${currentUser.userId}/${imageUpload.name}-${Date.now()}`);
-        await uploadBytes(imageRef, imageUpload);
-        return getDownloadURL(imageRef);
-    };
+  
 
     const handleSaveChanges = async () => {
         // Validate all fields before saving
@@ -86,14 +79,13 @@ const CustomerProfilePage = () => {
         try {
             let newImageUrl = profileData.profilePictureUrl;
             if (imageUpload) {
-                newImageUrl = await uploadProfilePicture();
+                setProfileData(prev => ({ ...prev, profilePicture: imageUpload }));
             }
             
-            const updatedData = { ...profileData, profilePictureUrl: newImageUrl };
             
-            await axiosCustomerInstance.put('/profile/update', updatedData);
+            const respnse = await axiosCustomerInstance.put('/profile/update', profileData);
             
-            setProfileData(updatedData);
+            setProfileData(respnse.data);
             toast.success('Profile updated successfully!', { id: toastId });
             setIsEditing(false); // Exit editing mode on success
         } catch (error) {

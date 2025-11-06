@@ -97,9 +97,8 @@ const authRequestInterceptor = (config) => {
 // --- Create instances with fallback navigation ---
 const createAuthInstance = (baseURL, navigate = null) => {
     const instance = axios.create({ 
-        baseURL, 
-        headers: { "Content-Type": "application/json" } 
-    });
+        baseURL
+     });
     instance.interceptors.request.use(authRequestInterceptor);
     instance.interceptors.response.use(
         response => response, 
