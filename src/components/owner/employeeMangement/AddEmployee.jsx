@@ -48,11 +48,19 @@ const AddEmployee = () => {
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
         setSubmitting(true);
         try {
+
+            const formData = new FormData();
+            formData.append('name', values.name);
+            formData.append('personalEmail', values.personalEmail);
+            formData.append('phone', values.phone);
+            formData.append('aadhaarNo', values.aadhaarNo);
+            formData.append('aadhaarImage', values.aadhaarImage);
+            formData.append('companyEmail', values.companyEmail);
+            formData.append('generatedPassword', values.generatedPassword);
+        
         
 
-            const response = await axiosOwnerInstance.post('/employees/add', values, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+            const response = await axiosOwnerInstance.post('/employees/add', formData);
 
             if (response.status === 201) {
                 navigate('/owner/employees/list');

@@ -7,9 +7,18 @@ import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
 
-import RestaurantSignup from "./components/signup/RestaurantSignup";
-
-
+const ReservationAvailabilitySetup = lazy(() =>
+import("./components/owner/reservationManagement/ReservationAvailabilitySetup.jsx")
+);
+const ReservationManagementPage = lazy(() =>
+import("./components/owner/reservationManagement/ReservationManagementPage.jsx")
+);
+const RestaurantSignup = lazy(() =>
+import("./components/signup/RestaurantSignup.jsx")
+);
+const OwnerOrderDetailPage = lazy(() =>
+import("./components/owner/orderManagement/OwnerOrderDetailPage.jsx")
+);
 const AddNewOrderPage = lazy(() =>
 import("./components/owner/orderManagement/AddNewOrderPage.jsx")
 );
@@ -250,6 +259,18 @@ function App() {
                 <Route
                   path="orders/new"
                   element={<AddNewOrderPage />}
+                />
+                <Route
+                  path="orders/:orderId"
+                  element={<OwnerOrderDetailPage />}
+                />
+                <Route
+                  path="reservations"
+                  element={<ReservationManagementPage />}
+                />
+                <Route
+                  path="reservations/availability-setup"
+                  element={<ReservationAvailabilitySetup />}
                 />
 
               </Route>

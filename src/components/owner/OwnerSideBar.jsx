@@ -101,12 +101,18 @@ const OwnerSidebar = () => {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/owner/reservations" className={linkClasses}>
+              <ListOrdered size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Reservation Management</span>}
+            </NavLink>
+          </li>
+          
+          <li>
             <NavLink to="/owner/settings" className={linkClasses}>
               <Settings size={20} className="flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Settings</span>}
             </NavLink>
           </li>
-          
         </ul>
 
         {/* Divider */}

@@ -89,7 +89,7 @@ function LoginCommon() {
 
                 if (response.status === 200) {
                   const jwtToken = response.data.token;
-                  const refreshToken = response.data.refreshToken;
+                  const refreshToken = response.data.newRefreshToken;
                   const jwtDecoded = jwtDecode(jwtToken);
                   Cookie.set('accessToken', jwtToken,{ expires: 1/48 });
                   Cookie.set('refreshToken', refreshToken, { expires: 7 });

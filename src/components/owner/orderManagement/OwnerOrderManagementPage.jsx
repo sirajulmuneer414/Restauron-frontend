@@ -22,6 +22,7 @@ const OwnerOrderManagementPage = () => {
     const [filterType, setFilterType] = useState('ALL');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -294,9 +295,9 @@ const OwnerOrderManagementPage = () => {
                             <tbody>
                                 {isLoading ? renderSkeletonRows(size) : orders.map((order) => (
                                     <tr 
-                                        key={order.id} 
+                                        key={order.encryptedId} 
                                         className="border-b border-gray-800/30 hover:bg-gray-800/30 cursor-pointer transition-all group"
-                                        onClick={() => navigate(`/owner/orders/${order.id}`)}
+                                        onClick={() => navigate(`/owner/orders/${order.encryptedId}`)}
                                     >
                                         <td className="p-5 font-mono text-yellow-400 group-hover:text-yellow-300">{order.billNumber}</td>
                                         <td className="p-5">
@@ -335,7 +336,7 @@ const OwnerOrderManagementPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {isLoading ? renderSkeletonCards(size) : orders.map((order) => (
                         <div
-                            key={order.id}
+                            key={order.encryptedId}
                             onClick={() => navigate(`/owner/orders/${order.encryptedId}`)}
                             className="bg-gradient-to-br from-gray-900/80 to-gray-900/40 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 hover:border-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/10 transition-all duration-200 cursor-pointer group hover:scale-105"
                         >

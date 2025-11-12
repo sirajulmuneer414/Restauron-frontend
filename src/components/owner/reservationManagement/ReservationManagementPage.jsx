@@ -143,7 +143,7 @@ function ReservationManagementPage() {
         </div>
         <Button
           className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          onClick={() => navigate('/owner/reservation/add-availability')}
+          onClick={() => navigate('/owner/reservations/availability-setup')}
         >
           <CalendarDays size={18} className="inline-block mr-2" />
           Set Reservation Availability

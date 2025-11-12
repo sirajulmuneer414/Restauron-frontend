@@ -3,3 +3,36 @@
 *::-webkit-scrollbar {
   display: none;
 }
+
+.react-time-picker {
+  background: #181e25 !important;
+  color: #fbbf24 !important;
+  border: 1.5px solid #fbbf24 !important;
+  border-radius: 0.75rem !important;
+}
+
+.react-time-picker__inputGroup__input,
+.react-time-picker__inputGroup__divider {
+  color: #fbbf24 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.react-time-picker__clear-button, .react-time-picker__clock-button {
+  color: #fbbf24 !important;
+  background: none !important;
+  border: none !important;
+}
+
+.react-time-picker__clock {
+  background-color: #181e25 !important;
+  border-radius: 0.75rem !important;
+}
+
+.react-time-picker__button svg {
+  stroke: #fbbf24 !important;
+}
+
+.react-time-picker__inputGroup input:focus {
+  outline: 2px solid #fde68a !important;
+}

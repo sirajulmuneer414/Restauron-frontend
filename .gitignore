@@ -24,4 +24,3 @@ dist-ssr
 *.sw?
 
 # Files to be ignored are mentioned here
-src/firebase/firebaseConfig.js

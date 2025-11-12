@@ -19,12 +19,15 @@ const AddNewOrderPage = () => {
   const navigate = useNavigate();
 
   // Customer State
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerEncryptedId, setCustomerEncryptedId] = useState('');
+  const [customer, setCustomer] = useState({
+    phone: '',
+    name: '',
+    email: '',
+    encryptedId: ''
+  });
   const [isCustomerFound, setIsCustomerFound] = useState(false);
   const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
+
 
   // Order Details State
   const [orderType, setOrderType] = useState('DINE_IN');
@@ -38,53 +41,65 @@ const AddNewOrderPage = () => {
   const [itemSearchResults, setItemSearchResults] = useState([]);
   const [isItemSearching, setIsItemSearching] = useState(false);
   const [cart, setCart] = useState([]);
+  const [resettingCustomer, setResettingCustomer] = useState(false);
+
 
   // Loading State
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Debouncing
-  const debouncedCustomerPhone = useDebounce(customerPhone, 500);
-  const debouncedCustomerEmail = useDebounce(customerEmail, 500);
-  const debouncedItemSearch = useDebounce(itemSearchQuery, 300);
+  const debouncedCustomerPhone = useDebounce(customer.phone, 1500);
+  const debouncedCustomerEmail = useDebounce(customer.email, 1500);
+  const debouncedItemSearch = useDebounce(itemSearchQuery, 1300);
 
   // Effects for Customer Search
   useEffect(() => {
-    if (isCustomerFound || !debouncedCustomerPhone) return;
+
+    if (resettingCustomer) {
+      setResettingCustomer(false);
+      console.log("Resetting customer search");
+      return;
+    }
+
+    if (isCustomerFound || !debouncedCustomerPhone) {
+      console.log("Skipping customer search");
+      return;
+    }
     const checkCustomer = async () => {
       setIsSearchingCustomer(true);
       try {
-        const response = await axiosOwnerInstance.get(`/owner/customers/check?phone=${debouncedCustomerPhone}`);
+        console.log("Checking customer with phone:", debouncedCustomerPhone);
+        const response = await axiosOwnerInstance.get(`/customer/check?phone=${debouncedCustomerPhone}`);
         if (response.status === 200 && response.data) {
           toast.success("Existing customer found!");
           const { name, phone, email, encryptedId } = response.data;
-          setCustomerName(name);
-          setCustomerPhone(phone);
-          setCustomerEmail(email || '');
-          setCustomerEncryptedId(encryptedId);
+          setCustomer({ name, phone, email, encryptedId });
           setIsCustomerFound(true);
         }
-      } catch (error) {/* no content is ok */}
+      } catch (error) {/* no content is ok */ }
       finally { setIsSearchingCustomer(false); }
     };
     checkCustomer();
   }, [debouncedCustomerPhone, isCustomerFound, axiosOwnerInstance]);
 
   useEffect(() => {
+    if (resettingCustomer) {
+      setResettingCustomer(false);
+      console.log("Resetting customer search");
+      return;
+    }
     if (isCustomerFound || !debouncedCustomerEmail || debouncedCustomerPhone) return;
     const checkCustomer = async () => {
       setIsSearchingCustomer(true);
       try {
-        const response = await axiosOwnerInstance.get(`/owner/customers/check?email=${debouncedCustomerEmail}`);
+        const response = await axiosOwnerInstance.get(`/customer/check?email=${debouncedCustomerEmail}`);
         if (response.status === 200 && response.data) {
           toast.success("Existing customer found!");
           const { name, phone, email, encryptedId } = response.data;
-          setCustomerName(name);
-          setCustomerPhone(phone);
-          setCustomerEmail(email || '');
-          setCustomerEncryptedId(encryptedId);
+          setCustomer({ name, phone, email, encryptedId });
           setIsCustomerFound(true);
         }
-      } catch (error) {/* no content is ok */}
+      } catch (error) {/* no content is ok */ }
       finally { setIsSearchingCustomer(false); }
     };
     checkCustomer();
@@ -95,7 +110,7 @@ const AddNewOrderPage = () => {
     if (orderType === 'DINE_IN') {
       const fetchTables = async () => {
         try {
-          const response = await axiosOwnerInstance.get('/owner/restaurant/tables/list');
+          const response = await axiosOwnerInstance.get('/tables/list');
           setTables(response.data);
         } catch (error) { toast.error("Failed to fetch tables."); }
       };
@@ -112,7 +127,7 @@ const AddNewOrderPage = () => {
     const searchItems = async () => {
       setIsItemSearching(true);
       try {
-        const response = await axiosOwnerInstance.get(`/owner/menu-items/search?name=${debouncedItemSearch}`);
+        const response = await axiosOwnerInstance.get(`/menu-items/search?name=${debouncedItemSearch}`);
         setItemSearchResults(response.data || []);
       } catch (error) {
         toast.error("Failed to search items.");
@@ -152,18 +167,17 @@ const AddNewOrderPage = () => {
 
   // Customer Reset
   const resetCustomer = () => {
-    setCustomerPhone('');
-    setCustomerName('');
-    setCustomerEmail('');
-    setCustomerEncryptedId('');
+    setResettingCustomer(true);
+    setCustomer({ phone: '', name: '', email: '', encryptedId: '' });
     setIsCustomerFound(false);
     setIsSearchingCustomer(false);
   };
 
+
   // Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isCustomerFound && (!customerName || !customerPhone)) {
+    if (!isCustomerFound && (!customer.name || !customer.phone)) {
       toast.error("Customer Name and Phone are required for new customers.");
       return;
     }
@@ -177,21 +191,21 @@ const AddNewOrderPage = () => {
     }
     setIsSubmitting(true);
     const payload = {
-      customerEncryptedId: isCustomerFound ? customerEncryptedId : undefined,
-      customerName: isCustomerFound ? undefined : customerName,
-      customerPhone: isCustomerFound ? undefined : customerPhone,
-      customerEmail: isCustomerFound ? undefined : customerEmail,
+      customerEncryptedId: isCustomerFound ? customer.encryptedId : undefined,
+      customerName: isCustomerFound ? undefined : customer.name,
+      customerPhone: isCustomerFound ? undefined : customer.phone,
+      customerEmail: isCustomerFound ? undefined : customer.email,
       orderType,
       paymentMode,
       status,
-      restaurantTableId: orderType === 'DINE_IN' ? restaurantTableId : undefined,
+      tableId: orderType === 'DINE_IN' ? restaurantTableId : undefined,
       items: cart.map(item => ({
-        encryptedMenuItemId: item.encryptedMenuItemId,
+        menuItemId: item.menuItemId,
         quantity: item.quantity
       })),
     };
     try {
-      await axiosOwnerInstance.post('/owner/orders/create', payload);
+      await axiosOwnerInstance.post('/orders/create', payload);
       toast.success("Order created successfully!");
       navigate('/owner/orders');
     } catch (err) {
@@ -237,8 +251,8 @@ const AddNewOrderPage = () => {
                   <input
                     id="customerPhone"
                     type="tel"
-                    value={customerPhone}
-                    onChange={e => setCustomerPhone(e.target.value)}
+                    value={customer.phone}
+                    onChange={e => setCustomer(prev => ({ ...prev, phone: e.target.value }))}
                     readOnly={isCustomerFound}
                     className={inputStyles}
                     placeholder="e.g., 9876543210"
@@ -250,8 +264,8 @@ const AddNewOrderPage = () => {
                   <label className="text-sm font-medium text-yellow-300">Name*</label>
                   <input
                     type="text"
-                    value={customerName}
-                    onChange={e => setCustomerName(e.target.value)}
+                    value={customer.name}
+                    onChange={e => setCustomer(c => ({ ...c, name: e.target.value }))}
                     readOnly={isCustomerFound}
                     className={inputStyles}
                     placeholder="e.g., John Doe"
@@ -261,8 +275,8 @@ const AddNewOrderPage = () => {
                   <label className="text-sm font-medium text-yellow-300">Email</label>
                   <input
                     type="email"
-                    value={customerEmail}
-                    onChange={e => setCustomerEmail(e.target.value)}
+                    value={customer.email}
+                    onChange={e => setCustomer(c => ({ ...c, email: e.target.value }))}
                     readOnly={isCustomerFound}
                     className={inputStyles}
                     placeholder="e.g., john@example.com"
@@ -296,7 +310,7 @@ const AddNewOrderPage = () => {
                     >
                       <option value="" disabled>Select a table</option>
                       {tables.map(table => (
-                        <option key={table.id} value={table.id}>{table.name}</option>
+                        <option key={table.tableId} value={table.tableId}>{table.name}</option>
                       ))}
                     </select>
                   </div>
@@ -340,19 +354,55 @@ const AddNewOrderPage = () => {
                   placeholder="Type to search menu items..."
                   className={inputStyles}
                 />
-            
+
                 {isItemSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-yellow-400" />}
                 {itemSearchResults.length > 0 && (
                   <ul className="absolute left-0 right-0 top-full bg-yellow-900 border-2 border-yellow-700 rounded-2xl max-h-64 overflow-y-auto z-20 shadow-2xl mt-2 transition-all duration-200 animate-fade-in">
-                    {itemSearchResults.map(item => (
-                      <li key={item.encryptedMenuItemId}
-                        onClick={() => handleAddItemToCart(item)}
-                        className="flex justify-between items-center py-3 px-4 hover:bg-yellow-400/30 cursor-pointer border-b border-yellow-700 last:border-b-0 transition rounded-xl">
-                        <span className="font-semibold text-yellow-100">{item.name}</span>
-                        <span className="font-mono text-yellow-200">₹{item.price.toFixed(2)}</span>
-                      </li>
-                    ))}
+                    {itemSearchResults.map(item => {
+                      // Accepts both a "status" field and `isAvailable` for safety
+                      const isUnavailable = item.status === "UNAVAILABLE" || item.isAvailable === false;
+
+                      return (
+                        <li
+                          key={item.encryptedId}
+                          // Only allow click if available
+                          onClick={!isUnavailable ? () => handleAddItemToCart(item) : undefined}
+                          className={
+                            "flex justify-between items-center py-3 px-4 border-b border-yellow-700 last:border-b-0 transition rounded-xl " +
+                            (isUnavailable
+                              ? "bg-gray-700 cursor-not-allowed opacity-60"
+                              : "hover:bg-yellow-400/30 cursor-pointer")
+                          }
+                          style={isUnavailable ? { pointerEvents: "none" } : {}}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={
+                                "font-semibold " +
+                                (isUnavailable ? "text-gray-400 line-through" : "text-yellow-100")
+                              }
+                            >
+                              {item.name}
+                            </span>
+                            {isUnavailable && (
+                              <span className="ml-2 bg-gray-600 text-xs text-gray-200 px-2 py-1 rounded">
+                                unavailable
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={
+                              "font-mono " +
+                              (isUnavailable ? "text-gray-400" : "text-yellow-200")
+                            }
+                          >
+                            ₹{item.price?.toFixed(2)}
+                          </span>
+                        </li>
+                      );
+                    })}
                   </ul>
+
                 )}
               </div>
             </div>
