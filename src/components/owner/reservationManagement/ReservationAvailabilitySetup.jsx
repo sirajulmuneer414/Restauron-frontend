@@ -5,7 +5,6 @@ import { Button } from "../../ui/button";
 import { useAxios } from "../../../axios/instances/axiosInstances";
 import { useNavigate } from "react-router-dom";
 
-// Apply amber theme for DatePicker
 const amberDatePickerCss = `
 .react-datepicker { background: #181e25; border: 1px solid #d97706; color: #fde68a; border-radius: 12px; overflow: hidden;}
 .react-datepicker__header { background: #1e1b16; border-bottom: 1px solid #fbbf24; color: #fde68a;}
@@ -32,15 +31,12 @@ function getEmptyOverride() {
 
 export default function ReservationAvailabilitySetup({ onClose }) {
   const { axiosOwnerInstance } = useAxios();
-  const [tab, setTab] = useState('weekly'); // 'weekly' or 'override'
-
-  // Weekly recurring state
+  const [tab, setTab] = useState('weekly');
   const [week, setWeek] = useState(getEmptyWeek());
   const [weeklyLoading, setWeeklyLoading] = useState(false);
   const [weeklySuccess, setWeeklySuccess] = useState(null);
   const [weeklyError, setWeeklyError] = useState(null);
 
-  // Single-date overrides state
   const [overrides, setOverrides] = useState(getEmptyOverride());
   const [activeOverrideDate, setActiveOverrideDate] = useState(null);
   const [overrideLoading, setOverrideLoading] = useState(false);
@@ -48,11 +44,9 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   const [overrideError, setOverrideError] = useState(null);
   const navigator = useNavigate();
 
-
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      // Fetch weekly
       try {
         const wRes = await axiosOwnerInstance.get('/reservation-availability/weekly');
         if (isMounted) {
@@ -63,27 +57,26 @@ export default function ReservationAvailabilitySetup({ onClose }) {
                 slots: (dayObj.slots || []).map(slot => ({
                   from: slot.slotFrom,
                   to: slot.slotTo,
-                  max: parseInt(slot.maxReservation, 10)
+                  max: parseInt(slot.maxReservation, 10),
+                  maxNoOfPeoplePerReservation: slot.maxNoOfPeoplePerReservation || 1
                 }))
               }))
-              : getEmptyWeek()   // fallback to always show all days!
+              : getEmptyWeek()
           );
-
         }
       } catch (err) {
         if (isMounted) setWeeklyError("Failed to load weekly availability.");
       }
-
-      // Fetch overrides
       try {
-        const oRes = await axiosOwnerInstance.get('/reservation-availability/override');
+        const oRes = await axiosOwnerInstance.get('/reservation-availability/overrides');
         if (isMounted) {
           const newOverrides = {};
           Array.isArray(oRes.data) && oRes.data.forEach(dayObj => {
             newOverrides[dayObj.date] = (dayObj.slots || []).map(s => ({
               from: s.slotFrom,
               to: s.slotTo,
-              max: Number(s.maxReservation)
+              max: parseInt(s.maxReservation, 10),
+              maxNoOfPeoplePerReservation: s.maxNoOfPeoplePerReservation || 1
             }));
           });
           setOverrides(newOverrides);
@@ -95,14 +88,17 @@ export default function ReservationAvailabilitySetup({ onClose }) {
     return () => { isMounted = false; };
   }, [axiosOwnerInstance]);
 
-
-
-  // --- Weekly methods
+  // ------- Weekly methods -------
   const handleSlotChange = (dayIdx, slotIdx, field, value) => {
     setWeek(prev =>
       prev.map((d, i) =>
         i === dayIdx
-          ? { ...d, slots: d.slots.map((slot, j) => j === slotIdx ? { ...slot, [field]: value } : slot) }
+          ? {
+              ...d,
+              slots: d.slots.map((slot, j) =>
+                j === slotIdx ? { ...slot, [field]: value } : slot
+              )
+            }
           : d
       )
     );
@@ -111,7 +107,7 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   const addSlot = dayIdx => {
     setWeek(prev =>
       prev.map((d, i) => i === dayIdx
-        ? { ...d, slots: [...d.slots, { from: "", to: "", max: 1 }] }
+        ? { ...d, slots: [...d.slots, { from: "", to: "", max: 1, maxNoOfPeoplePerReservation: 1 }] }
         : d
       )
     );
@@ -120,7 +116,9 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   const removeSlot = (dayIdx, slotIdx) => {
     setWeek(prev =>
       prev.map((d, i) =>
-        i === dayIdx ? { ...d, slots: d.slots.filter((_, j) => j !== slotIdx) } : d
+        i === dayIdx
+          ? { ...d, slots: d.slots.filter((_, j) => j !== slotIdx) }
+          : d
       )
     );
   };
@@ -128,24 +126,23 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   const copyDayToAll = srcDayIdx => {
     const srcSlots = week[srcDayIdx].slots.map(slot => ({ ...slot }));
     setWeek(week.map((d, idx) => ({
-      day: d.day,      // Do not overwrite the original day string!
+      day: d.day,      // Keep the correct day label for each block
       slots: [...srcSlots],
     })));
   };
-
 
   const clearAllDays = () => setWeek(getEmptyWeek());
 
   const saveWeekly = async (e) => {
     e && e.preventDefault();
     setWeeklyLoading(true); setWeeklyError(null); setWeeklySuccess(null);
-
     const weekPayload = week.map(dayObj => ({
       day: dayObj.day,
       slots: dayObj.slots.map(slot => ({
         slotFrom: slot.from,
         slotTo: slot.to,
-        maxReservation: String(slot.max) // or keep as int if backend changed!
+        maxReservation: String(slot.max),
+        maxNoOfPeoplePerReservation: Number(slot.maxNoOfPeoplePerReservation)
       }))
     }));
     try {
@@ -159,7 +156,7 @@ export default function ReservationAvailabilitySetup({ onClose }) {
     }
   };
 
-  // --- Overrides methods
+  // ------- Overrides methods -------
   const overrideDates = Object.keys(overrides).sort();
 
   const handleAddOverrideSlot = () => {
@@ -167,7 +164,8 @@ export default function ReservationAvailabilitySetup({ onClose }) {
     if (!dateStr) return;
     setOverrides(prev => ({
       ...prev,
-      [dateStr]: [...(prev[dateStr] || []), { from: "", to: "", max: 1 }]
+      [dateStr]: [...(prev[dateStr] || []),
+        { from: "", to: "", max: 1, maxNoOfPeoplePerReservation: 1 }]
     }));
   };
 
@@ -203,11 +201,12 @@ export default function ReservationAvailabilitySetup({ onClose }) {
     setOverrideLoading(true); setOverrideError(null); setOverrideSuccess(null);
     const overridesPayload = Object.entries(overrides)
       .map(([day, slots]) => ({
-        day: day, // This is e.g. "2025-12-18"
+        day: day,
         slots: slots.map(slot => ({
           slotFrom: slot.from,
           slotTo: slot.to,
-          maxReservation: String(slot.max)
+          maxReservation: String(slot.max),
+          maxNoOfPeoplePerReservation: Number(slot.maxNoOfPeoplePerReservation)
         }))
       }));
     try {
@@ -224,7 +223,7 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm">
       <style>{amberDatePickerCss}</style>
-      <div className="bg-linear-to-br from-black/80 to-gray-900/60 w-full max-w-3xl rounded-2xl p-8 border-2 border-amber-600 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-gradient-to-br from-black/80 to-gray-900/60 w-full max-w-3xl rounded-2xl p-8 border-2 border-amber-600 shadow-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold text-amber-400 mb-4">Set Reservation Availability</h2>
         <div className="flex gap-2 mb-6">
           <Button
@@ -265,29 +264,48 @@ export default function ReservationAvailabilitySetup({ onClose }) {
                     <div className="text-amber-200 text-xs italic mb-3">No slots set. This day is not available for reservation.</div>
                   )}
                   {day.slots.map((slot, sIdx) => (
-                    <div key={sIdx} className="flex gap-2 mb-2 items-center">
-                      <input type="time" value={slot.from} required
-                        onChange={e => handleSlotChange(dIdx, sIdx, "from", e.target.value)}
-                        className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                      />
-                      <span className="text-amber-300">to</span>
-                      <input type="time" value={slot.to} required
-                        onChange={e => handleSlotChange(dIdx, sIdx, "to", e.target.value)}
-                        className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                      />
-                      <input
-                        type="number"
-                        min={1}
-                        value={slot.max}
-                        onChange={e => handleSlotChange(dIdx, sIdx, "max", Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-16 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                        placeholder="Max"
-                        required
-                      />
-                      <span className="text-amber-200 text-xs">max</span>
+                    <div key={sIdx} className="grid sm:flex gap-2 mb-2 items-center sm:items-end sm:flex-wrap">
+                      <div className="flex flex-col">
+                        <label className="text-xs text-amber-300 pl-1">From</label>
+                        <input type="time" value={slot.from} required
+                          onChange={e => handleSlotChange(dIdx, sIdx, "from", e.target.value)}
+                          className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-xs text-amber-300 pl-1">To</label>
+                        <input type="time" value={slot.to} required
+                          onChange={e => handleSlotChange(dIdx, sIdx, "to", e.target.value)}
+                          className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-xs text-amber-300 pl-1">Max Res</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={slot.max}
+                          onChange={e => handleSlotChange(dIdx, sIdx, "max", Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-16 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                          placeholder="Max"
+                          required
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-xs text-amber-300 pl-1">Max People</label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={slot.maxNoOfPeoplePerReservation}
+                          onChange={e => handleSlotChange(dIdx, sIdx, "maxNoOfPeoplePerReservation", Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-20 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                          placeholder="Max People"
+                          required
+                        />
+                      </div>
                       <Button type="button"
                         onClick={() => removeSlot(dIdx, sIdx)}
-                        className="bg-black/40 text-amber-500 hover:bg-red-900 hover:text-white px-2 py-1 text-xs font-bold rounded"
+                        className="bg-black/40 text-amber-500 hover:bg-red-900 hover:text-white px-3 py-1 text-xs font-bold rounded self-end"
                       >×</Button>
                     </div>
                   ))}
@@ -327,36 +345,57 @@ export default function ReservationAvailabilitySetup({ onClose }) {
               {activeOverrideDate && (
                 <Button type="button"
                   onClick={() => removeOverride(activeOverrideDate)}
-                  className="ml-2 border border-red-900 bg-red-900/40 text-red-200 text-xs rounded px-3 py-1 hover:bg-red-700">Remove Override</Button>
+                  className="ml-2 border border-red-900 bg-red-900/40 text-red-200 text-xs rounded px-3 py-1 hover:bg-red-700">
+                  Remove Override
+                </Button>
               )}
             </div>
             {activeOverrideDate && (
               <div className="bg-black/40 rounded-lg p-4 border border-amber-900 mb-2">
                 <div className="font-semibold text-amber-400 mb-3">{activeOverrideDate} slots</div>
                 {(overrides[activeOverrideDate] || []).map((slot, sIdx) => (
-                  <div key={sIdx} className="flex gap-2 mb-2 items-center">
-                    <input type="time" value={slot.from} required
-                      onChange={e => handleOverrideSlotChange(sIdx, "from", e.target.value)}
-                      className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                    />
-                    <span className="text-amber-300">to</span>
-                    <input type="time" value={slot.to} required
-                      onChange={e => handleOverrideSlotChange(sIdx, "to", e.target.value)}
-                      className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                    />
-                    <input
-                      type="number"
-                      min={1}
-                      value={slot.max}
-                      onChange={e => handleOverrideSlotChange(sIdx, "max", Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
-                      placeholder="Max"
-                      required
-                    />
-                    <span className="text-amber-200 text-xs">max</span>
+                  <div key={sIdx} className="grid sm:flex gap-2 mb-2 items-center sm:items-end sm:flex-wrap">
+                    <div className="flex flex-col">
+                      <label className="text-xs text-amber-300 pl-1">From</label>
+                      <input type="time" value={slot.from} required
+                        onChange={e => handleOverrideSlotChange(sIdx, "from", e.target.value)}
+                        className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-xs text-amber-300 pl-1">To</label>
+                      <input type="time" value={slot.to} required
+                        onChange={e => handleOverrideSlotChange(sIdx, "to", e.target.value)}
+                        className="bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-xs text-amber-300 pl-1">Max Res</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={slot.max}
+                        onChange={e => handleOverrideSlotChange(sIdx, "max", Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-16 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                        placeholder="Max"
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-xs text-amber-300 pl-1">Max People</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={slot.maxNoOfPeoplePerReservation}
+                        onChange={e => handleOverrideSlotChange(sIdx, "maxNoOfPeoplePerReservation", Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-20 text-center bg-black/60 border border-amber-700 text-amber-100 px-2 py-1 rounded focus:border-amber-400"
+                        placeholder="Max People"
+                        required
+                      />
+                    </div>
                     <Button type="button"
                       onClick={() => handleRemoveOverrideSlot(sIdx)}
-                      className="bg-black/40 text-amber-500 hover:bg-red-900 hover:text-white px-2 py-1 text-xs font-bold rounded"
+                      className="bg-black/40 text-amber-500 hover:bg-red-900 hover:text-white px-3 py-1 text-xs font-bold rounded self-end"
                     >×</Button>
                   </div>
                 ))}
