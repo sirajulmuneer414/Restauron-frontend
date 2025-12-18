@@ -9,6 +9,7 @@ import specialPermissionsSlice from '../slice/specialPermissions';
 import userSlice from '../slice/userSlice';
 import specialValuesSlice from '../slice/specialValues';
 import ownerDetailsSlice from '../slice/ownerDetailsSlice';
+import restaurantConfigSlice from '../slice/restaurantConfigSlice';
 
 // Step 1: Combine all your reducers
 const rootReducer = combineReducers({
@@ -18,13 +19,14 @@ const rootReducer = combineReducers({
     userSlice: userSlice,
     specialValues: specialValuesSlice,
     ownerDetailsSlice: ownerDetailsSlice,
+    restaurantConfig: restaurantConfigSlice,
 });
 
 // Step 2: Configure persistence
 const persistConfig = {
     key: 'restauron',
     storage: storageSession, // Use sessionStorage
-    whitelist: ['userSlice', 'specialPermissions', 'ownerDetailsSlice'], // only these slices will be persisted
+    whitelist: ['userSlice', 'specialPermissions', 'ownerDetailsSlice', 'restaurantConfig'], // only these slices will be persisted
     blacklist: ['isLoadingSlice', 'signupOption', 'specialValues'] // these won't be persisted
 };
 

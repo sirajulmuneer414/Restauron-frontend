@@ -8,12 +8,14 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sun, // Example icon for a menu item
-  DollarSign, // Example icon
+  Sun,
+  DollarSign,
   Table,
   ChartColumnBig,
   UserPen,
-  ListOrdered 
+  ListOrdered,
+  Building,
+  Package 
 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
@@ -22,6 +24,10 @@ const OwnerSidebar = () => {
 
   const user = useSelector((state) => state.userSlice.user);
   const restaurantName = useSelector((state) => state.ownerDetailsSlice.restaurantName);
+  
+  // Helper to get the first letter safely
+  const restaurantInitial = restaurantName ? restaurantName.charAt(0).toUpperCase() : 'R';
+
   const commonLinkClasses = 'flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200';
   const activeClasses = 'bg-yellow-500/10 text-yellow-300 border-l-4 border-yellow-500';
   const inactiveClasses = 'text-gray-400 hover:bg-white/5 hover:text-white border-l-4 border-transparent';
@@ -56,12 +62,23 @@ const OwnerSidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-grow px-4 py-6 space-y-4 overflow-y-auto">
-        {/* Main Menu */}
         <ul className="space-y-2">
           <li>
             <NavLink to="/owner/dashboard" className={linkClasses}>
               <LayoutDashboard size={20} className="flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Dashboard</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/owner/restaurant-settings" className={linkClasses}>
+              <Building size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Restaurant Settings</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/owner/subscriptions" className={linkClasses}>
+              <Package size={20} className="flex-shrink-0" />
+              {!isCollapsed && <span className="font-medium">Subscription Management</span>}
             </NavLink>
           </li>
           <li>
@@ -106,13 +123,13 @@ const OwnerSidebar = () => {
               {!isCollapsed && <span className="font-medium">Reservation Management</span>}
             </NavLink>
           </li>
-          
+{/*           
           <li>
             <NavLink to="/owner/settings" className={linkClasses}>
               <Settings size={20} className="flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Settings</span>}
             </NavLink>
-          </li>
+          </li> */}
         </ul>
 
         {/* Divider */}
@@ -138,13 +155,13 @@ const OwnerSidebar = () => {
       {/* Footer / User Profile Area */}
       <div className={`px-4 py-4 border-t border-gray-800/60`}>
         <div className="flex items-center gap-3">
-          <img
-            src="https://i.pravatar.cc/40" // Replace with actual user image
-            alt="Owner"
-            className="w-10 h-10 rounded-full border-2 border-yellow-500/50"
-          />
+          {/* Changed Image to Initial Div */}
+          <div className="w-10 h-10 rounded-full border-2 border-yellow-500/50 bg-gray-800 flex items-center justify-center text-yellow-500 font-bold text-lg flex-shrink-0">
+            {restaurantInitial}
+          </div>
+          
           <div className={`transition-opacity duration-200 ${isCollapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-            <h4 className="font-semibold text-white whitespace-nowrap">{user.name}</h4>
+            <h4 className="font-semibold text-white whitespace-nowrap">{user?.name}</h4>
             <p className="text-xs text-gray-400 whitespace-nowrap">{restaurantName}</p>
           </div>
         </div>

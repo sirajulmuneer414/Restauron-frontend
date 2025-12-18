@@ -4,10 +4,13 @@ import { useAxios } from '../../../axios/instances/axiosInstances';
 import { resetUserDetails } from '../../../redux/slice/userSlice';
 import toast from 'react-hot-toast';
 import { User, Edit, Camera, LogOut, Trash2, Mail, Phone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerProfilePage = () => {
     const { axiosCustomerInstance } = useAxios();
+    const restaurantId = useSelector(state => state.specialValues.customerPageRestaurantId);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { user: currentUser, isAuthenticated } = useSelector(state => state.userSlice);
 
     const [profileData, setProfileData] = useState({ name: '', email: '', phone: '', profilePictureUrl: '' });
@@ -101,7 +104,9 @@ const CustomerProfilePage = () => {
                 await axiosCustomerInstance.delete('/profile/delete');
                 toast.success('Account deleted successfully.');
                 dispatch(resetUserDetails());
+                navigate(`/restaurant/${restaurantId}/home`); // Redirect to restaurant home page
             } catch (error) {
+                console.error("Account deletion failed:", error);
                 toast.error('Failed to delete account.');
             }
         }
@@ -110,6 +115,7 @@ const CustomerProfilePage = () => {
     const handleLogout = () => {
         dispatch(resetUserDetails());
         toast.success('Logged out successfully.');
+        navigate(`/restaurant/${restaurantId}/home`); // Redirect to restaurant home page
     };
 
     if (isLoading) {

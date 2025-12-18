@@ -138,9 +138,9 @@ const AddNewOrderPage = () => {
 
   // Cart Management
   const handleAddItemToCart = (item) => {
-    const existingItem = cart.find(cartItem => cartItem.encryptedMenuItemId === item.encryptedMenuItemId);
+    const existingItem = cart.find(cartItem => cartItem.encryptedId === item.encryptedId);
     if (existingItem) {
-      handleUpdateQuantity(item.encryptedMenuItemId, existingItem.quantity + 1);
+      handleUpdateQuantity(item.encryptedId, existingItem.quantity + 1);
     } else {
       setCart([...cart, { ...item, quantity: 1 }]);
     }
@@ -148,15 +148,15 @@ const AddNewOrderPage = () => {
     setItemSearchResults([]);
   };
 
-  const handleUpdateQuantity = (encryptedMenuItemId, quantity) => {
-    if (quantity <= 0) handleRemoveFromCart(encryptedMenuItemId);
+  const handleUpdateQuantity = (encryptedId, quantity) => {
+    if (quantity <= 0) handleRemoveFromCart(encryptedId);
     else setCart(cart.map(item =>
-      item.encryptedMenuItemId === encryptedMenuItemId ? { ...item, quantity } : item
+      item.encryptedId === encryptedId ? { ...item, quantity } : item
     ));
   };
 
-  const handleRemoveFromCart = (encryptedMenuItemId) => {
-    setCart(cart.filter(item => item.encryptedMenuItemId !== encryptedMenuItemId));
+  const handleRemoveFromCart = (encryptedId) => {
+    setCart(cart.filter(item => item.encryptedId !== encryptedId));
   };
 
   // Calculate Totals
@@ -200,7 +200,7 @@ const AddNewOrderPage = () => {
       status,
       tableId: orderType === 'DINE_IN' ? restaurantTableId : undefined,
       items: cart.map(item => ({
-        menuItemId: item.menuItemId,
+        encryptedId: item.encryptedId,
         quantity: item.quantity
       })),
     };
@@ -416,7 +416,7 @@ const AddNewOrderPage = () => {
               ) : (
                 <div className="space-y-3">
                   {cart.map(item => (
-                    <div key={item.encryptedMenuItemId}
+                    <div key={item.encryptedId}
                       className="flex items-center gap-3 p-3 rounded-xl bg-yellow-900/40 border-2 border-yellow-900">
                       <div>
                         <p className="font-semibold text-yellow-100">{item.name}</p>
@@ -424,19 +424,19 @@ const AddNewOrderPage = () => {
                       </div>
                       <div className="flex items-center gap-2 border border-yellow-700 rounded-full bg-yellow-900 px-2">
                         <Button type="button" size="sm" variant="ghost" className="hover:bg-yellow-700 rounded-full"
-                          onClick={() => handleUpdateQuantity(item.encryptedMenuItemId, item.quantity - 1)}>
+                          onClick={() => handleUpdateQuantity(item.encryptedId, item.quantity - 1)}>
                           <Minus size={16} />
                         </Button>
                         <span className="w-8 text-center font-bold text-yellow-300">{item.quantity}</span>
                         <Button type="button" size="sm" variant="ghost" className="hover:bg-yellow-700 rounded-full"
-                          onClick={() => handleUpdateQuantity(item.encryptedMenuItemId, item.quantity + 1)}>
+                          onClick={() => handleUpdateQuantity(item.encryptedId, item.quantity + 1)}>
                           <Plus size={16} />
                         </Button>
                       </div>
                       <p className="w-20 text-right font-mono text-yellow-300">₹{(item.price * item.quantity).toFixed(2)}</p>
                       <Button type="button" size="sm" variant="ghost"
                         className="text-red-400 hover:text-red-500"
-                        onClick={() => handleRemoveFromCart(item.encryptedMenuItemId)}>
+                        onClick={() => handleRemoveFromCart(item.encryptedId)}>
                         <Trash2 size={16} />
                       </Button>
                     </div>

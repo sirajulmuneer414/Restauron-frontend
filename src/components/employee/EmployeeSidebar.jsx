@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
+import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, Lock, ShoppingCart, UtensilsCrossed, Menu } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const EmployeeSidebar = () => {
@@ -56,6 +56,15 @@ const EmployeeSidebar = () => {
         <NavItem to={`/employee/profile/${user.specialId}`} icon={User}>
           Profile
         </NavItem>
+        <NavItem to="/employee/menu" icon={Menu}>
+          Menu
+        </NavItem>
+           <NavItem to="/employee/pos" icon={ShoppingCart}>
+          New Order (POS)
+        </NavItem>
+        <NavItem to="/employee/kitchen" icon={UtensilsCrossed}>
+          Kitchen Display
+        </NavItem>
 
         <NavItem to="/employee/change-password" icon={Lock}>
           Change Password
@@ -65,7 +74,7 @@ const EmployeeSidebar = () => {
       </nav>
 
       {/* Footer / User Profile & Logout Area */}
-      <div className={`px-4 py-4 border-t border-gray-800/60`}>
+      <div className={`px-4 pt-4 border-t border-gray-800/60`}>
         <div className="flex items-center gap-3">
           <img
             // You can generate a simple avatar based on the user's name
@@ -78,7 +87,7 @@ const EmployeeSidebar = () => {
             <p className="text-xs text-gray-400 whitespace-nowrap">Employee</p>
           </div>
         </div>
-        <button className="w-full mt-4 flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 text-red-400 hover:bg-red-500/10 hover:text-red-300">
+      <button className="w-full mt-4 mb-1 flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 text-red-400 hover:bg-red-500/10 hover:text-red-300">
           <LogOut size={20} className="flex-shrink-0" />
           {!isCollapsed && <span className="font-medium whitespace-nowrap">Logout</span>}
         </button>

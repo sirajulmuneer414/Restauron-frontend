@@ -68,7 +68,7 @@ export default function ReservationAvailabilitySetup({ onClose }) {
         if (isMounted) setWeeklyError("Failed to load weekly availability.");
       }
       try {
-        const oRes = await axiosOwnerInstance.get('/reservation-availability/overrides');
+        const oRes = await axiosOwnerInstance.get('/reservation-availability/override');
         if (isMounted) {
           const newOverrides = {};
           Array.isArray(oRes.data) && oRes.data.forEach(dayObj => {
@@ -223,7 +223,7 @@ export default function ReservationAvailabilitySetup({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm">
       <style>{amberDatePickerCss}</style>
-      <div className="bg-gradient-to-br from-black/80 to-gray-900/60 w-full max-w-3xl rounded-2xl p-8 border-2 border-amber-600 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-linear-to-br from-black/80 to-gray-900/60 w-full max-w-3xl rounded-2xl p-8 border-2 border-amber-600 shadow-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold text-amber-400 mb-4">Set Reservation Availability</h2>
         <div className="flex gap-2 mb-6">
           <Button

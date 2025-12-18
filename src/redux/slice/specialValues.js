@@ -2,7 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     waitingForApprovalMessage: "",
-    adminCode:""
+    adminCode:"",
+    customerPageRestaurantId: "",
 }
 
 export const specialValuesSlice = createSlice({
@@ -20,9 +21,16 @@ export const specialValuesSlice = createSlice({
         },
         resetAdminCode: (state) => {
             state.adminCode = "";
-        }
+        },
+        setCustomerPageRestaurantId: (state, action) => {
+            state.customerPageRestaurantId = action.payload;
+        },
+        resetCustomerPageRestaurantId: (state) => {
+            state.customerPageRestaurantId = "";
+        },
+
     },
 });
 
-export const { setWaitingForApprovalMessage, resetWaitingForApprovalMessage, setAdminCode, resetAdminCode} = specialValuesSlice.actions;
+export const { setWaitingForApprovalMessage, resetWaitingForApprovalMessage, setAdminCode, resetAdminCode, setCustomerPageRestaurantId, resetCustomerPageRestaurantId } = specialValuesSlice.actions;
 export default specialValuesSlice.reducer;

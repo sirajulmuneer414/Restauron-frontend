@@ -164,23 +164,37 @@ function RestaurantSignup() {
 
     try {
 
-      const details = {
-        name: formData.yourName,
-        email: formData.yourEmail,
-        phone: formData.yourPhone,
-        password: formData.password,
-        aadhaarNumber: formData.aadhaarNumber,
-        aadhaarPhoto: formData.aadhaarImage,
-        restaurantName: formData.restaurantName,
-        restaurantAddress: formData.restaurantAddress,
-        restaurantPhone: formData.restaurantPhone,
-        restaurantEmail: formData.restaurantEmail,
-        district: formData.district,
-        state: formData.state,
-        pincode: formData.pincode
-      };
+      
+    const form = new FormData();
 
-      const response = await axiosSignupInstance.post("/restaurant", details);
+    form.append("name", formData.yourName);
+    form.append("email", formData.yourEmail);
+    form.append("password", formData.password);
+    form.append("aadhaarNumber", formData.aadhaarNumber);
+    form.append("restaurantName", formData.restaurantName);
+    form.append("restaurantAddress", formData.restaurantAddress);
+    form.append("restaurantPhone", formData.restaurantPhone);
+    form.append("district", formData.district);
+    form.append("state", formData.state);
+    form.append("pincode", formData.pincode);
+
+    // Optional/nullable fields (ensure you don't append undefined)
+    if(formData.restaurantEmail) form.append("restaurantEmail", formData.restaurantEmail);
+    if (formData.yourPhone) form.append("phone", formData.yourPhone);
+
+    // File field
+    if (formData.aadhaarImage) {
+      form.append("aadhaarPhoto", formData.aadhaarImage);
+    }
+
+      console.log("Submitting form data:", formData);
+
+      for (let pair of form.entries()) {
+  console.log(pair[0], pair[1]);
+}
+
+
+      const response = await axiosSignupInstance.post("/restaurant", form);
       if (response.status === 201) {
         await dispatch(setOtpEmail(formData.yourEmail));
         setFormData({

@@ -114,6 +114,10 @@ function ReservationManagementPage() {
     }
   };
 
+  const addModalSuccess = () => {
+    setShowAddModal(false);
+  }
+
   // Skeletons for loading
   const renderSkeletonGrid = (count = 6) =>
     Array.from({ length: count }).map((_, i) => (
@@ -134,7 +138,7 @@ function ReservationManagementPage() {
     ));
 
   return (
-    <div className="container mx-auto p-4 text-white">
+    <div className="container mx-auto p-4 text-white bg-linear-to-b from-black/60 to-gray-500 min-h-screen">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
@@ -174,6 +178,7 @@ function ReservationManagementPage() {
               <option value="CONFIRMED">Confirmed</option>
               <option value="PENDING">Pending</option>
               <option value="CANCELLED">Cancelled</option>
+              <option value="REJECTED">Rejected</option>
             </select>
           </div>
         </div>
@@ -222,22 +227,28 @@ function ReservationManagementPage() {
                         <User size={28} className="text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold">{res.name}</h3>
-                        <p className="text-sm text-gray-400 truncate">{res.email}</p>
+                        <h3 className="text-lg font-bold">{res.customerName}</h3>
+                        <p className="text-sm text-gray-400 truncate">{res.customerEmail}</p>
                       </div>
                     </div>
                     <div className="space-y-3 text-sm mb-6">
                       <p className="flex items-center gap-3">
-                        <Phone size={16} className="text-gray-500" /> {res.phone || 'N/A'}
+                        <Phone size={16} className="text-gray-500" /> {res.customerPhone || 'N/A'}
                       </p>
                       <p className="flex items-center gap-3">
-                        <CalendarDays size={16} className="text-gray-500" /> {new Date(res.reservationTime).toLocaleString()}
+                        <CalendarDays size={16} className="text-gray-500" /> {res.reservationDate}, {res.reservationTime}
                       </p>
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      <p><span className="font-semibold">Guests:</span> {res.noOfPeople}</p>
+                      {res.specialRequests && (
+                        <p className="mt-2"><span className="font-semibold">Special Requests:</span> {res.remark}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyles(res.status)}`}>
-                      {res.status}
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyles(res.currentStatus)}`}>
+                      {res.currentStatus}
                     </span>
                     <Button
                       onClick={() => setSelected(res)}
@@ -272,17 +283,17 @@ function ReservationManagementPage() {
                 ) : (
                   reservations.map(res => (
                     <tr key={res.id} className="hover:bg-gray-800/50 transition-colors">
-                      <td className="py-3 px-4 font-medium">{res.name}</td>
-                      <td className="py-3 px-4 text-gray-400">{res.email}</td>
-                      <td className="py-3 px-4 text-gray-300">{res.phone}</td>
+                      <td className="py-3 px-4 font-medium">{res.customerName}</td>
+                      <td className="py-3 px-4 text-gray-400">{res.customerEmail}</td>
+                      <td className="py-3 px-4 text-gray-300">{res.customerPhone}</td>
                       <td className="py-3 px-4 text-gray-300">
-                        {new Date(res.reservationTime).toLocaleString()}
+                        {res.reservationDate}, {res.reservationTime}
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyles(res.status)}`}
+                          className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyles(res.currentStatus)}`}
                         >
-                          {res.status}
+                          {res.currentStatus}
                         </span>
                       </td>
                       <td className="py-3 px-4">
@@ -346,7 +357,7 @@ function ReservationManagementPage() {
           </div>
         </div>
       )}
-      {showAddModal && <AddReservationModal onClose={() => setShowAddModal(false)} />}
+      {showAddModal && <AddReservationModal onClose={() => setShowAddModal(false)} onSuccess={addModalSuccess} />}
       {selected && <ReservationDetailsModal reservation={selected} onClose={() => setSelected(null)} />}
     </div>
   );

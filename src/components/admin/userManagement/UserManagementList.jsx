@@ -155,7 +155,7 @@ function UserManagementList() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 bg-linear-to-b from-black/60 to-gray-500 min-h-screen">
       {/* Header bar */}
       <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>

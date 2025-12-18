@@ -168,7 +168,7 @@ function CategoryManagementList() {
     );
 
     return (
-        <div className="container mx-auto p-4 text-white">
+        <div className="container mx-auto p-4 text-white bg-linear-to-b from-black/60 to-gray-500 min-h-screen">
             {/* Header */}
             <div className="mb-6">
                 <h1 className="text-3xl font-bold">Category Management</h1>

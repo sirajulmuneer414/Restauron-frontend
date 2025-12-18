@@ -178,7 +178,7 @@ const OwnerOrderManagementPage = () => {
     );
 
     return (
-        <div className="p-4 md:p-8 text-white min-h-screen">
+        <div className="p-4 md:p-8 text-white min-h-screen bg-linear-to-b from-black/60 to-gray-500">
             {/* Header */}
             <header className="flex flex-col lg:flex-row justify-between lg:items-center gap-4 mb-8">
                 <div>

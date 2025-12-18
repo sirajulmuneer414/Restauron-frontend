@@ -6,6 +6,7 @@ import { Button } from '../../ui/button';
 import { Plus, Trash2, QrCode, Link as LinkIcon, Check } from 'lucide-react';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 import Cookie from 'js-cookie';
+import toast from 'react-hot-toast';
 
  // Assuming an owner-specific instance
 
@@ -26,7 +27,7 @@ const TableCard = ({ table, restaurantEncryptedId, onDelete }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-        alert('Failed to copy URL. Please copy manually.');
+        toast.error('Failed to copy URL. Please copy manually.' + (err.response?.data?.message || ''));
     }
   };
 
@@ -92,7 +93,7 @@ const TableManagementPage = () => {
       const response = await axiosOwnerInstance.get('/tables/list');
       setTables(response.data || []);
     } catch (err) {
-      setError('Failed to fetch tables.');
+      setError('Failed to fetch tables.'+ (err.response?.data?.message || ''));
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +116,7 @@ const TableManagementPage = () => {
       setNewTableName('');
       fetchTables();
     } catch (err) {
-      setError('Failed to create table.');
+      setError('Failed to create table.'+ (err.response?.data?.message || ''));
     }
   };
 
@@ -125,7 +126,7 @@ const TableManagementPage = () => {
       await axiosOwnerInstance.delete(`/tables/delete/${tableEncryptedId}`);
       fetchTables();
     } catch (err) {
-      setError('Failed to delete table.');
+      setError('Failed to delete table.'+ (err.response?.data?.message || ''));
     }
   };
 
@@ -141,7 +142,7 @@ const TableManagementPage = () => {
   if (isLoading) return <CommonLoadingSpinner />;
 
   return (
-    <div className="container mx-auto p-4 text-white">
+    <div className="container mx-auto p-4 text-white bg-linear-to-b from-black/60 to-gray-500 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Table Management</h1>
 
       <div className="mb-8 max-w-md">

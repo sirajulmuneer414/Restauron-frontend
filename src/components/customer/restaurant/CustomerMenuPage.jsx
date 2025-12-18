@@ -28,7 +28,7 @@ const MenuItemModal = ({ item, isOpen, onClose, onAddToCart }) => {
               <CircleDot size={20} className={item.veg ? "text-green-500" : "text-red-500"} />
               <h2 className="text-3xl font-bold text-white">{item.name}</h2>
             </div>
-            <p className="text-gray-400 mb-6 flex-grow">{item.description}</p>
+            <p className="text-gray-400 mb-6 grow">{item.description}</p>
             <div className="flex justify-between items-center mb-4">
               <span className="text-3xl font-bold text-yellow-400">₹{item.price.toFixed(2)}</span>
               <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg p-1">
@@ -67,11 +67,11 @@ const CartSidebar = ({ isOpen, onClose, cartItems, totalPrice, updateQuantity, c
         </div>
         {cartItems.length > 0 ? (
           <>
-            <div className="flex-grow p-4 space-y-4 overflow-y-auto">
+            <div className="grow p-4 space-y-4 overflow-y-auto">
               {cartItems.map(item => (
                 <div key={item.encryptedId} className="flex items-center gap-4">
                   <img src={item.imageUrl} alt={item.name} className="w-16 h-16 rounded-lg object-cover" />
-                  <div className="flex-grow">
+                  <div className="grow">
                     <p className="font-semibold text-white">{item.name}</p>
                     <p className="text-yellow-400 font-bold">₹{item.price.toFixed(2)}</p>
                   </div>
@@ -95,7 +95,7 @@ const CartSidebar = ({ isOpen, onClose, cartItems, totalPrice, updateQuantity, c
             </div>
           </>
         ) : (
-          <div className="flex-grow flex flex-col items-center justify-center text-gray-500">
+          <div className="grow flex flex-col items-center justify-center text-gray-500">
             <ShoppingCart size={48} className="mb-4" />
             <p className="font-semibold">Your cart is empty</p>
             <p className="text-sm">Add items from the menu to get started.</p>

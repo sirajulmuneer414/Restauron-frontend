@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, UtensilsCrossed, Users, Building } from 'lucide-react';
+import { LayoutDashboard, UtensilsCrossed, Users, Building, Package, Currency, Bell } from 'lucide-react';
+
 
 const AdminSidebar = () => {
   const itemBase =
@@ -14,7 +15,7 @@ const AdminSidebar = () => {
     `${itemBase} ${isActive ? activeClasses : inactiveClasses}`;
 
   return (
-    <aside className="h-screen w-68 bg-gradient-to-b from-black via-gray-950 to-black text-white shadow-xl border-r border-gray-800/60">
+    <aside className="h-screen w-68 bg-linear-to-b from-black via-gray-950 to-black text-white shadow-xl border-r border-gray-800/60">
       {/* Brand */}
       <div className="px-4 py-5 border-b border-gray-800/60">
         <div className="flex items-center gap-3">
@@ -119,6 +120,66 @@ const AdminSidebar = () => {
                       }`}
                     />
                     <span>User Management</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/subscriptions" className={linkClasses}>
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={`h-5 w-1 rounded-full transition-colors ${
+                        isActive ? 'bg-amber-500' : 'bg-transparent group-hover:bg-white/20'
+                      }`}
+                    />  
+                    <Package
+                      size={18}
+                      className={`transition-colors ${
+                        isActive ? 'text-amber-400' : 'text-gray-400 group-hover:text-white'
+                      }`}
+                    />
+                    <span>Subscription Management</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/payments" className={linkClasses}>
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={`h-5 w-1 rounded-full transition-colors ${
+                        isActive ? 'bg-amber-500' : 'bg-transparent group-hover:bg-white/20'
+                      }`}
+                    />  
+                    <Currency
+                      size={18}
+                      className={`transition-colors ${
+                        isActive ? 'text-amber-400' : 'text-gray-400 group-hover:text-white'
+                      }`}
+                    />
+                    <span>Payment History</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/admin/notifications" className={linkClasses}>
+                {({ isActive }) => (
+                  <>
+                    <span
+                      className={`h-5 w-1 rounded-full transition-colors ${
+                        isActive ? 'bg-amber-500' : 'bg-transparent group-hover:bg-white/20'
+                      }`}
+                    />  
+                    <Bell
+                      size={18}
+                      className={`transition-colors ${
+                        isActive ? 'text-amber-400' : 'text-gray-400 group-hover:text-white'  
+                      }`}
+                    />
+                    <span>Notifications</span>
                   </>
                 )}
               </NavLink>

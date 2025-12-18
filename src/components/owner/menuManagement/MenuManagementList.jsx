@@ -208,7 +208,7 @@ function MenuItemManagementList() {
     useEffect(() => { fetchData(); }, [fetchData]);
 
     return (
-        <div className="container mx-auto p-4 text-white">
+        <div className="container mx-auto p-4 text-white bg-linear-to-b from-black/60 to-gray-500 min-h-screen">
             <h1 className="text-3xl font-bold mb-2">Menu Item Management</h1>
             <p className="text-gray-400 mb-6">Add and manage all items on your menu.</p>
             

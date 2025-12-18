@@ -6,7 +6,36 @@ import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
-
+const RestaurantSettings = lazy(() =>
+  import("./components/owner/restaurantManagement/RestaurantSettings.jsx")
+);
+const EmployeeMenuPage = lazy(() =>
+  import("./components/employee/orders/EmployeeMenuPage.jsx")
+);
+const KitchenDisplay = lazy(() =>
+  import("./components/employee/orders/KitchenDisplay.jsx")
+);
+const POSPage = lazy(() =>
+  import("./components/employee/orders/POSPage.jsx")
+);
+const AdminNotifications = lazy(() =>
+import("./components/admin/notification/AdminNotifications.jsx")
+);
+const SubscriptionPlans = lazy(() =>
+import("./components/owner/subscriptionMangement/SubscriptionPlans.jsx")
+);
+const PaymentHistory = lazy(() =>
+import("./components/admin/subscriptionManagement/PaymentHistory.jsx")
+);
+const OwnerDashboard = lazy(() =>
+import("./components/owner/dashboard/OwnerDashboard.jsx")
+);
+const AdminSubscriptionsPage = lazy(() =>
+import("./components/admin/subscriptionManagement/AdminSubscriptionsPage.jsx")
+);
+const AdminDashboard = lazy(() =>
+import("./components/admin/admindashboard/AdminDashboard.jsx")
+);
 const ReservationAvailabilitySetup = lazy(() =>
 import("./components/owner/reservationManagement/ReservationAvailabilitySetup.jsx")
 );
@@ -122,6 +151,11 @@ const CustomerManagementPage = lazy(() =>
 const CustomerDetailPage = lazy(() => 
   import("./components/owner/customerManagement/CustomerDetailPage")
 );
+const ResetPasswordPage = lazy(() => 
+  import("./components/login/ResetPasswordPage")
+);
+// const OwnerOrderDetailPage
+// const
 
 OwnerOrderManagementPage
 
@@ -138,11 +172,11 @@ function App() {
             FallbackComponent={ErrorFallback}
             onReset={() => {
 
-              if (user.role === 'owner') {
+              if (user.role.toLowerCase() === 'owner') {
                 window.location.href = '/owner/employees/list';
-              } else if (user.role === 'admin') {
-                window.location.href = '/admin/restaurants';
-              } else if (user.role === 'employee') {
+              } else if (user.role.toLowerCase() === 'admin') {
+                window.location.href = '/admin/dashboard';
+              } else if (user.role.toLowerCase() === 'employee') {
                 window.location.href = '/employee/dashboard';
               }
 
@@ -151,6 +185,7 @@ function App() {
         
         <Routes>
            <Route path="/" element={<RestaurantSignup />} />
+           <Route path="/reset-password" element={<ResetPasswordPage />} />
             {otpPermission ? (
               <Route path="/otpVerification" element={<OtpVerifcationPage />} />
             ) : (
@@ -173,6 +208,10 @@ function App() {
               <Route path="/admin" element={<AdminLayoutPage />}>
                 {/* Define admin-specific routes here */}
                 <Route
+                  path="dashboard"
+                  element={<AdminDashboard />}
+                />
+                <Route
                   path="restaurant/requests"
                   element={<RestaurantApprovalRequests />}
                 />
@@ -192,12 +231,25 @@ function App() {
                   path="users"
                   element={<UserManagementList />}
                 />
+                <Route
+                  path="notifications"
+                  element={<AdminNotifications />}
+                />
               // In your router configuration
                 <Route
                   path="users/detail/:userEncryptionId"
                   element={<UserDetailsPage />} />
+                <Route
+                  path="subscriptions"
+                  element={<AdminSubscriptionsPage />}
+                />
+                <Route
+                  path="payments"
+                  element={<PaymentHistory />}
+                />
 
               </Route>
+              
             ) : (
               <Route
                 path="/admin/*"
@@ -213,8 +265,16 @@ function App() {
               >
                 {/* Define owner-specific routes here */}
                 <Route
+                  path="dashboard"
+                  element={<OwnerDashboard />}
+                /> {/* Default page */}
+                <Route
                   path="employees/list"
                   element={<EmployeeManagementList />}
+                />
+                <Route
+                  path="restaurant-settings"
+                  element={<RestaurantSettings />}
                 />
                 <Route
                   path="employees/add"
@@ -272,7 +332,11 @@ function App() {
                   path="reservations/availability-setup"
                   element={<ReservationAvailabilitySetup />}
                 />
-
+                <Route
+                  path="subscriptions"
+                  element={<SubscriptionPlans />}
+                />
+             
               </Route>
             ) : (
               <Route
@@ -285,6 +349,9 @@ function App() {
             {user && user.role.toLowerCase() === "employee" ? (
               <Route path="/employee" element={<EmployeeLayoutPage />}>
                 <Route path="dashboard" element={<EmployeeDashboard />} /> {/* Default page */}
+                <Route path="pos" element={<POSPage />} />
+                <Route path="kitchen" element={<KitchenDisplay />} />
+                <Route path="menu" element={<EmployeeMenuPage />} />
                 <Route path="profile/:specialId" element={<EmployeeProfilePage />} />{/* Profile page */}
                 <Route path="change-password" element={<EmployeeChangePasswordPage />} />
 
@@ -305,7 +372,7 @@ function App() {
             </Route>
 
             <Route path="/customer" element={<CustomerLayout />}>
-                <Route path="profile" element={<CustomerProfilePage />} />
+                <Route path="profile/:encryptedId" element={<CustomerProfilePage />} />
              </Route>
             <Route path="/public/login/:encryptedId" element={<CustomerAuthPage />} />
 

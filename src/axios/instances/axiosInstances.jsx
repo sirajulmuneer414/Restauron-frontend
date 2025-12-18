@@ -79,40 +79,32 @@ const authRequestInterceptor = async (config) => {
     config.headers.Authorization = `Bearer ${accessToken}`;
   } else {
     const oldRefreshToken = Cookies.get("refreshToken");
-    console.log(oldRefreshToken)
-    try {
-      // Skip interceptor for refresh request itself if needed
-      const response = await axios.post(
-        `${BASE_URL}/auth/refresh-token`,
-        { oldRefreshToken }
-      );
 
-      console.log("Refresh response:", response);
-      const { token: token, newRefreshToken: newRefreshToken } = response.data;
+    if (oldRefreshToken) {
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/auth/refresh-token`,
+          { oldRefreshToken }
+        );
 
-      Cookies.set("accessToken", token, { expires: 1 / 48 });
-      if (newRefreshToken) {
-        Cookies.set("refreshToken", newRefreshToken, { expires: 7 });
+        const { token, newRefreshToken } = response.data;
+        Cookies.set("accessToken", token, { expires: 1 / 48 });
+        if (newRefreshToken) {
+          Cookies.set("refreshToken", newRefreshToken, { expires: 7 });
+        }
+        config.headers.Authorization = `Bearer ${token}`;
+      } catch (refreshError) {
+        toast.error("Session expired. Please log in again.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        Cookies.remove("accessToken");
+        Cookies.remove("refreshToken");
+        return Promise.reject(refreshError);
       }
-
-      config.headers.Authorization = `Bearer ${token}`;
-    } catch (refreshError) {
-      toast.error("Session expired. Please log in again.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-
-      Cookies.remove("accessToken");
-      Cookies.remove("refreshToken");
-
-    //   setTimeout(() => {
-    //     window.location.href = "/login";
-    //   }, 10000);
-
-      return Promise.reject(refreshError);
-    }
+    } 
+    // If NO refresh token either, do NOT set Authorization, allow request to proceed.
   }
-
   // Custom header logic
   const restaurantId = Cookies.get("restaurantId");
   if (restaurantId) {
@@ -147,8 +139,7 @@ export const axiosLoginInstance = axios.create({
 });
 
 export const axiosSignupInstance = axios.create({ 
-    baseURL: `${BASE_URL}/registration`,
-    headers: { "Content-Type": "application/json" }
+    baseURL: `${BASE_URL}/registration`
 });
 
 // The createAuthInstance factory now correctly applies the modified interceptor
