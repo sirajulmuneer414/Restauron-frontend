@@ -57,11 +57,11 @@ const POSPage = () => {
     const fetchInitialData = async () => {
         try {
             const tablesData = await employeeService.getAllTables();
-            console.log("Tables Data:", tablesData);
+            // console.log("Tables Data:", tablesData);
             setTables(tablesData);
             // Fetch categories (optional, if you have an API, otherwise hardcode or extract)
             const categoriesData = await employeeService.getAllCategories();
-            console.log("Categories Data:", categoriesData);
+            // console.log("Categories Data:", categoriesData);
             setCategories([{encryptedCategoryId:'All', name:'All'}, ...categoriesData]); 
         } catch (error) {
             console.error("Init Error:", error);
@@ -75,7 +75,7 @@ const POSPage = () => {
             // Use the new SEARCH method
             const data = await employeeService.searchMenu(searchQuery, selectedCategory.name, 0, 100); 
 
-            console.log("Menu Data:", data.content);
+            // console.log("Menu Data:", data.content);
             setMenuItems(data.content || []);
         } catch (error) {
             console.error("Menu Error:", error);
@@ -120,9 +120,7 @@ const POSPage = () => {
             return toast.error("Customer Name is required for Takeaway.");
         }
 
-        cart.map(i => {
-                    console.log(i.encryptedId, i.quantity);
-            });
+      
         const payload = {
             customerName: customerInfo.name,
             customerPhone: customerInfo.phone,

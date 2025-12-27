@@ -9,7 +9,7 @@ const useOrderAlert = () => {
     if (!('speechSynthesis' in window)) {
       console.error("Browser does not support text-to-speech");
       const audio = new Audio(notificationSound); // Fallback sound
-        audio.play().catch(e => console.log("Audio play failed", e));
+        audio.play().catch(e =>  console.log("Audio play failed", e));
       return;
     }
 

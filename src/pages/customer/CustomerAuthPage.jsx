@@ -107,13 +107,13 @@ const CustomerAuthPage = () => {
     setErrors({});
     if (activeTab === 'login') {
       try {
-        console.log("In login try");
+        // console.log("In login try");
         const response = await axiosPublicInstance.post('/auth/login', values);
-        console.log("Login response:", response);
+        // console.log("Login response:", response);
         Cookie.remove('accessToken');
         Cookie.remove('refreshToken');
         Cookie.remove('customerId');
-        console.log("Old cookies removed");
+        // console.log("Old cookies removed");
         handleAuthSuccess(response.data.token, response.data.refreshToken, response.data.specialId);
       } catch (error) {
         setErrors({ api: error.response?.data?.message || 'Login failed.' });

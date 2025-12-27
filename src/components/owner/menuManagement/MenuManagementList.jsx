@@ -78,7 +78,7 @@ function CreateMenuItemModal({ isOpen, onClose, categories, onSuccess }) {
     };
 
 const handleSubmit = async (e) => {
-    console.log('Submitting form with data:', formData, 'and imageFile:', imageFile);
+    // console.log('Submitting form with data:', formData, 'and imageFile:', imageFile);
     e.preventDefault();
     setIsLoading(true);
     setError(null);

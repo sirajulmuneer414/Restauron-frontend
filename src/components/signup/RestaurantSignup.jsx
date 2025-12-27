@@ -187,11 +187,9 @@ function RestaurantSignup() {
       form.append("aadhaarPhoto", formData.aadhaarImage);
     }
 
-      console.log("Submitting form data:", formData);
+      // console.log("Submitting form data:", formData);
 
-      for (let pair of form.entries()) {
-  console.log(pair[0], pair[1]);
-}
+     
 
 
       const response = await axiosSignupInstance.post("/restaurant", form);

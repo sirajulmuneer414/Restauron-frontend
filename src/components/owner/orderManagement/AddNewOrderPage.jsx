@@ -57,18 +57,18 @@ const AddNewOrderPage = () => {
 
     if (resettingCustomer) {
       setResettingCustomer(false);
-      console.log("Resetting customer search");
+      // console.log("Resetting customer search");
       return;
     }
 
     if (isCustomerFound || !debouncedCustomerPhone) {
-      console.log("Skipping customer search");
+      // console.log("Skipping customer search");
       return;
     }
     const checkCustomer = async () => {
       setIsSearchingCustomer(true);
       try {
-        console.log("Checking customer with phone:", debouncedCustomerPhone);
+        // console.log("Checking customer with phone:", debouncedCustomerPhone);
         const response = await axiosOwnerInstance.get(`/customer/check?phone=${debouncedCustomerPhone}`);
         if (response.status === 200 && response.data) {
           toast.success("Existing customer found!");
@@ -85,7 +85,7 @@ const AddNewOrderPage = () => {
   useEffect(() => {
     if (resettingCustomer) {
       setResettingCustomer(false);
-      console.log("Resetting customer search");
+      // console.log("Resetting customer search");
       return;
     }
     if (isCustomerFound || !debouncedCustomerEmail || debouncedCustomerPhone) return;

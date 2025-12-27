@@ -80,13 +80,13 @@ function OtpVerification() {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     const otpString = otp.join('');
-    console.log("OTP Entered: ", otpString);
-    console.log("Email: ", otpEmail);
+    // console.log("OTP Entered: ", otpString);
+    // console.log("Email: ", otpEmail);
 
     try {
       let response = await axiosSignupInstance.post('/restaurant/verify-otp', { email: otpEmail, otp: otpString });
         if (response.data === true) {
-          console.log("OTP Verified Successfully!");
+          // console.log("OTP Verified Successfully!");
           
         } else {
           console.error("OTP Verification Failed:", response.data);

@@ -152,7 +152,7 @@ export default function AddReservationModal({ onClose, onSuccess }) {
           }
         });
         // Backend returns array of { slotFrom, slotTo, maxNoOfPeoplePerReservation }
-        console.log("Fetched slots:", data);
+        // console.log("Fetched slots:", data);
         setSlots(data || []);
         setSlotsStatus({ loading: false, error: null });
       } catch (err) {

@@ -59,9 +59,9 @@ const SubscriptionPlans = () => {
             // 1. Create Order on Backend
             const orderData = await ownerService.createPaymentOrder(pkg.id);
             const contactNumber = await ownerService.getOwnerContactNumber();
-            console.log("Owner Contact Number:", contactNumber);
+            // console.log("Owner Contact Number:", contactNumber);
             const razorpayKey = await razorpayService.getRazorpayKey();
-            console.log("Razorpay Key:", razorpayKey);
+            // console.log("Razorpay Key:", razorpayKey);
             
             // 2. Open Razorpay Options
             const options = {

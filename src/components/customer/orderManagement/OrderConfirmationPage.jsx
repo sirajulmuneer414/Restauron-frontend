@@ -73,7 +73,7 @@ const OrderConfirmationPage = () => {
             }, 2000);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to place order.');
-            console.log(error);
+            // console.log(error);
             setIsSubmitting(false);
         }
     };

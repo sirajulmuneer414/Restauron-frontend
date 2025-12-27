@@ -36,8 +36,8 @@ const ResetPasswordPage = () => {
         }
 
         setIsLoading(true);
-        console.log("Resetting password with token:", token);
-        console.log("New Password:", newPassword);
+        // console.log("Resetting password with token:", token);
+        // console.log("New Password:", newPassword);
         try {
             await axiosInstances.post('/auth/reset-password', {
                 token: token,

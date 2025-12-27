@@ -85,7 +85,7 @@ const EditMenuItemModal = ({ isOpen, onClose, item, categories, onSaveSuccess })
                 imageFile: imageFile ? imageFile : null
             };
 
-            console.log('Payload for update:', payload);
+            // console.log('Payload for update:', payload);
             
             // Simplified API call
             await axiosOwnerInstance.put(`/menu/update/${item.encryptedId}`, payload, {

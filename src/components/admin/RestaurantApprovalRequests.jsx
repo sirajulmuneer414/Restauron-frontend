@@ -49,7 +49,7 @@ function RestaurantApprovalRequests() {
 
       if (response.status === 200 && response.data) {
         const data = response.data;
-        console.log('Fetched restaurant approval requests:', data);
+        // console.log('Fetched restaurant approval requests:', data);
         setRestaurantRequests(data.content || []);
         setTotalPages(typeof data.totalPages === 'number' ? data.totalPages : 0);
         setTotalElements(typeof data.totalElements === 'number' ? data.totalElements : 0);

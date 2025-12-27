@@ -65,7 +65,7 @@ const { axiosAdminInstance} = useAxios();
       });
 
       if (response.status === 200 && response.data === true) {
-        console.log(`Status updated to ${newStatus} successfully.`);
+        // console.log(`Status updated to ${newStatus} successfully.`);
         // Update status locally for immediate feedback
         setDetails(prev => ({ ...prev, status: newStatus }));
         // Optionally navigate back to the list after a delay
