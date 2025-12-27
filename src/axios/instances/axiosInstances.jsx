@@ -4,8 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-const BASE_URL = "http://restauron-backend-env.eba-92t8tcxd.eu-north-1.elasticbeanstalk.com";
-
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 // --- Interceptor Logic ---
 const createAuthResponseInterceptor = (navigate) => async (error) => {
     const originalRequest = error.config;
