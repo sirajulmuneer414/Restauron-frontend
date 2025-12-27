@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { 
     ArrowRight, 
-    User, 
-    Calendar, 
+    User,  
     Utensils, 
     ChefHat, 
     LayoutGrid, 

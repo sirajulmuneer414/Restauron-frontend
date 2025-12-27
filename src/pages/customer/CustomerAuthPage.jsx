@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAxios } from '../../axios/instances/axiosInstances';
 import { Button } from '../../components/ui/button';
-import { User, Mail, Lock, ShieldCheck, RefreshCw, Phone, Store } from 'lucide-react';
+import { User, Mail, ShieldCheck, RefreshCw, Phone, Store } from 'lucide-react';
 import PasswordInput from '../../components/ui/PasswordInput';
 import Cookie from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';

@@ -80,7 +80,6 @@ const CustomerProfilePage = () => {
         const toastId = toast.loading('Updating profile...');
         
         try {
-            let newImageUrl = profileData.profilePictureUrl;
             if (imageUpload) {
                 setProfileData(prev => ({ ...prev, profilePicture: imageUpload }));
             }
@@ -92,7 +91,7 @@ const CustomerProfilePage = () => {
             toast.success('Profile updated successfully!', { id: toastId });
             setIsEditing(false); // Exit editing mode on success
         } catch (error) {
-            toast.error('Failed to update profile.', { id: toastId });
+            toast.error('Failed to update profile.' , { id: toastId });
         } finally {
             setImageUpload(null);
         }
@@ -146,7 +145,7 @@ const CustomerProfilePage = () => {
                     </div>
                     
                     {/* Profile Info */}
-                    <div className="flex-grow w-full">
+                    <div className="grow w-full">
                         {isEditing ? (
                             <div className="space-y-4">
                                 <div>

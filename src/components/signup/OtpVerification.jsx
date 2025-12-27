@@ -4,7 +4,7 @@ import { axiosSignupInstance } from '../../axios/instances/axiosInstances';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
 import{ Button } from '../ui/button'
-import { resetAllowOtp, resetOtpEmail } from '../../redux/slice/signupOptionSlice';
+import { resetAllowOtp } from '../../redux/slice/signupOptionSlice';
 import toast from 'react-hot-toast';
 // Assuming a signup-specific instance
 
@@ -84,30 +84,14 @@ function OtpVerification() {
     console.log("Email: ", otpEmail);
 
     try {
-      let response; // Declare response here
-      if (signupOption === "restaurant") {
-        response = await axiosSignupInstance.post('/restaurant/verify-otp', { email: otpEmail, otp: otpString });
+      let response = await axiosSignupInstance.post('/restaurant/verify-otp', { email: otpEmail, otp: otpString });
         if (response.data === true) {
           console.log("OTP Verified Successfully!");
           
         } else {
           console.error("OTP Verification Failed:", response.data);
         }
-      } else if (signupOption === "employee") {
-        response = await axiosSignupInstance.post('/employee/verify-otp', { email: otpEmail, otp: otpString });
-        if (response.status === 200) {
-          console.log("OTP Verified Successfully!");
-        } else {
-          console.log("OTP verification failed ", response.data);
-        }
-      }else if( signupOption === "admin") {
-        response = await axiosSignupInstance.post('/admin/verify-otp', { email: otpEmail, otp: otpString });
-        if (response.status === 200) {
-          console.log("OTP Verified Successfully!");
-        } else {
-          console.log("OTP verification failed ", response.data);
-        }
-      }
+    
 
       if (response && response.data === true) { // Check if response data is true
         setIsLoading(false);
@@ -128,64 +112,21 @@ function OtpVerification() {
     }
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp =async () => {
     setTimeLeft(60);
     setOtp(["", "", "", "", "", ""]);
 
+    let response = await axiosSignupInstance.post('/restaurant/resend-otp', { email: otpEmail });
 
+    if(response && response.data === true){
+      toast.success("OTP Resent Successfully!");
+    } else {
+      toast.error("Failed to resend OTP. Please try again later.");
+    }
 
     inputRef.current[0]?.focus();
 
-    if (signupOption === "restaurant") {
-      try {
-        const response = axiosSignupInstance.post('/restaurant/resend-otp', { email: restaurantOwner.email, name: restaurantOwner.name });
-
-        if (response.status === 200) {
-
-          toast.success("OTP Resent Successfully!");
-        }
-      }
-      catch (error) {
-
-        console.error("Error resending OTP:", error);
-        setError("Failed to resend OTP. Please try again.");
-
-
-      }
-
-    }
-    else if (signupOption === "employee") {
-      try {
-        const response = axiosSignupInstance.post('/employee/resend-otp', { email: employee.email, name: employee.name });
-
-        if (response.status === 200) {
-
-          toast.success("OTP Resent Successfully!");
-        }
-      }
-      catch (error) {
-
-        console.error("Error resending OTP:", error);
-        setError("Failed to resend OTP. Please try again.");
-
-      }
-    }
-    else if (signupOption === "admin") {
-      try {
-        const response = axiosSignupInstance.post('/admin/resend-otp', { email: admin.email, name: admin.name });
-
-        if (response.status === 200) {
-
-          toast.success("OTP Resent Successfully!");
-        }
-      }
-      catch (error) {
-
-        console.error("Error resending OTP:", error);
-        setError("Failed to resend OTP. Please try again.");
-
-      }
-    }
+    
   }
 
 

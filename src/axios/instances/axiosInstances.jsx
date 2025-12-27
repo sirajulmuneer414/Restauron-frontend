@@ -4,7 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-const BASE_URL = "http://localhost:8081";
+const BASE_URL = "http://restauron-backend-env.eba-92t8tcxd.eu-north-1.elasticbeanstalk.com";
 
 // --- Interceptor Logic ---
 const createAuthResponseInterceptor = (navigate) => async (error) => {
@@ -20,14 +20,14 @@ const createAuthResponseInterceptor = (navigate) => async (error) => {
                 const encryptedId = Cookies.get('restaurantId');
                 if (encryptedId) {
                     if (navigate) navigate(`/public/login/${encryptedId}`);
-                    else window.location.href = `/public/login/${encryptedId}`;
-                    return Promise.reject(error);
+                    else globalThis.location.href = `/public/login/${encryptedId}`;
+                    throw new Error('No refresh token available');
                 }
 
 
             }
             if (navigate) navigate('/login');
-            else window.location.href = '/login';
+            else globalThis.location.href = '/login';
             return Promise.reject(error);
         }
 
@@ -53,20 +53,20 @@ const createAuthResponseInterceptor = (navigate) => async (error) => {
                 const encryptedId = Cookies.get('restaurantId');
                 if (encryptedId) {
                     if (navigate) navigate(`/public/login/${encryptedId}`);
-                    else window.location.href = `/public/login/${encryptedId}`;
+                    else globalThis.location.href = `/public/login/${encryptedId}`;
                 } else {
-                    if (navigate) navigate('/login');
-                    else window.location.href = '/login';
+                    if(navigate){ navigate('/login'); }
+                    else globalThis.location.href = '/login';
                 }
             } else {
                 if (navigate) navigate('/login');
-                else window.location.href = '/login';
+                else globalThis.location.href = '/login';
             }
             
-            return Promise.reject(refreshError);
+            throw  new Error('Session expired. Please log in again. '+ refreshError.message);
         }
     }
-    return Promise.reject(error);
+    throw new Error(error.response?.data?.message || 'An error occurred');
 };
 
 /**
@@ -100,7 +100,7 @@ const authRequestInterceptor = async (config) => {
         });
         Cookies.remove("accessToken");
         Cookies.remove("refreshToken");
-        return Promise.reject(refreshError);
+        throw new Error('Session expired. Please log in again. '+ refreshError.message);
       }
     } 
     // If NO refresh token either, do NOT set Authorization, allow request to proceed.

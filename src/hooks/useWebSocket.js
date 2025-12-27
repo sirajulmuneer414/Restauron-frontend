@@ -8,7 +8,7 @@ import SockJS from 'sockjs-client';
 import useOrderAlert from "./useOrderAlert";
 
 // Change URL to http (SockJS uses http to handshake)
-const SOCKET_URL = "http://localhost:8081/ws-restauron"; 
+const SOCKET_URL = "http://restauron-backend-env.eba-92t8tcxd.eu-north-1.elasticbeanstalk.com/ws-restauron"; 
 
 export const useWebSocket = () => {
   const [notifications, setNotifications] = useState([]);

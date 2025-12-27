@@ -76,7 +76,7 @@ const OwnerSidebar = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/owner/subscriptions" className={linkClasses}>
+            <NavLink to="/owner/subscription" className={linkClasses}>
               <Package size={20} className="flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Subscription Management</span>}
             </NavLink>
@@ -110,7 +110,7 @@ const OwnerSidebar = () => {
               <Table size={20} className="flex-shrink-0" />
               {!isCollapsed && <span className="font-medium">Table Management</span>}
             </NavLink>
-          </li>
+        </li>
           <li>
             <NavLink to="/owner/category" className={linkClasses}>
               <ChartColumnBig size={20} className="flex-shrink-0" />
@@ -136,7 +136,7 @@ const OwnerSidebar = () => {
         <hr className={`border-gray-800/60 my-4 ${isCollapsed ? 'mx-2' : 'mx-4'}`} />
 
         {/* Secondary Menu */}
-        <ul className="space-y-2">
+        {/* <ul className="space-y-2">
            <li>
                 <NavLink to="/owner/reports" className={linkClasses}>
                     <DollarSign size={20} className="flex-shrink-0" />
@@ -149,7 +149,7 @@ const OwnerSidebar = () => {
                     {!isCollapsed && <span className="font-medium">Promotions</span>}
                 </NavLink>
             </li>
-        </ul>
+        </ul> */}
       </nav>
 
       {/* Footer / User Profile Area */}

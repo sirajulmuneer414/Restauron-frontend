@@ -69,12 +69,18 @@ const KitchenDisplay = () => {
     };
 
     // --- HELPERS ---
-    const getElapsedTime = (dateString) => {
-        const start = new Date(dateString);
-        const diff = Math.floor((currentTime - start) / 60000);
-        if (diff < 1) return 'Just now';
-        return `${diff} min ago`;
-    };
+const getElapsedTime = (dateString) => { 
+    if (!dateString) return 'N/A';
+
+    const now = new Date(); 
+
+    const start = new Date(dateString);
+
+    const diff = Math.floor((now - start) / 60000);
+
+    if (diff < 1) return 'Just now';
+    return `${diff} min ago`;
+};
 
     const getStatusColor = (status, timeElapsed) => {
         const isUrgent = status === 'PENDING' && timeElapsed > 20;

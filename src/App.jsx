@@ -6,6 +6,9 @@ import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
+const OwnerSubscriptionHome = lazy(() =>
+  import("./components/owner/subscriptionMangement/OwnerSubscriptionHome.jsx")
+);
 const RestaurantSettings = lazy(() =>
   import("./components/owner/restaurantManagement/RestaurantSettings.jsx")
 );
@@ -268,6 +271,7 @@ function App() {
                   path="dashboard"
                   element={<OwnerDashboard />}
                 /> {/* Default page */}
+                
                 <Route
                   path="employees/list"
                   element={<EmployeeManagementList />}
@@ -333,7 +337,11 @@ function App() {
                   element={<ReservationAvailabilitySetup />}
                 />
                 <Route
-                  path="subscriptions"
+                  path="subscription"
+                  element={<OwnerSubscriptionHome />}
+                />
+                <Route
+                  path="subscription/plans"
                   element={<SubscriptionPlans />}
                 />
              

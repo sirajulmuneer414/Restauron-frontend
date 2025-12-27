@@ -1,7 +1,7 @@
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, Pie, PieChart as RPieChart,  BarChart, Bar } from "recharts";
 import { useAxios } from "../../../axios/instances/axiosInstances";
-import { to } from "@react-spring/web";
+
 
 
 
@@ -22,9 +22,9 @@ export function CardStats() {
           axiosAdminInstance.get("/stats/active-reservations")  
         ]);
         setTotalData({
-          totalRestaurants: resRestaurants.data.total || 0, 
-          totalCustomers: resCustomers.data.total || 0,
-          activeReservations: resReservations.data.total || 0
+          totalRestaurants: resRestaurants.data.totalRestaurants || 0, 
+          totalCustomers: resCustomers.data.totalCustomers || 0,
+          activeReservations: resReservations.data.totalReservations || 0
         });
       } catch (error) {
         console.error("Error fetching stats:", error);

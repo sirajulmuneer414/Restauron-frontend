@@ -72,14 +72,14 @@ const EditMenuItemModal = ({ isOpen, onClose, item, categories, onSaveSuccess })
         setIsLoading(true);
         setError(null);
         setProgress(0);
-        const folderName = restaurantName.replace(/\s+/g, '_');
+
         
         try {
             
             const payload = {
                 name: formData.name,
                 description: formData.description,
-                price: parseFloat(formData.price),
+                price: Number.parseFloat(formData.price),
                 isVegetarian: formData.isVegetarian,
                 categoryEncryptedId: formData.categoryEncryptedId,
                 imageFile: imageFile ? imageFile : null

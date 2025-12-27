@@ -42,7 +42,7 @@ const store = configureStore({
                 ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
             },
         }),
-    devTools: process.env.NODE_ENV !== 'production',
+    devTools: true,
 });
 
 // Step 5: Create persistor
