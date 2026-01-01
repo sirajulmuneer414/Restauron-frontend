@@ -1,11 +1,34 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, Lock, ShoppingCart, UtensilsCrossed, Menu } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import Cookies from 'js-cookie';
+import toast from 'react-hot-toast';
+import { resetUserDetails } from '../../redux/slice/userSlice';
+
 
 const EmployeeSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
   const user = useSelector((state) => state.userSlice.user); // Get user data from Redux
+
+  // Logout handler
+  const handleLogout = () => {
+    // Remove BOTH tokens
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    
+    // Clear Redux state
+    dispatch(resetUserDetails());
+   
+    // Show success message
+    toast.success('Logged out successfully');
+    
+    // Redirect to login
+    navigate('/login');
+  };
 
   // A helper component for navigation links
   const NavItem = ({ to, icon: Icon, children }) => (
@@ -59,25 +82,21 @@ const EmployeeSidebar = () => {
         <NavItem to="/employee/menu" icon={Menu}>
           Menu
         </NavItem>
-           <NavItem to="/employee/pos" icon={ShoppingCart}>
+        <NavItem to="/employee/pos" icon={ShoppingCart}>
           New Order (POS)
         </NavItem>
         <NavItem to="/employee/kitchen" icon={UtensilsCrossed}>
           Kitchen Display
         </NavItem>
-
         <NavItem to="/employee/change-password" icon={Lock}>
           Change Password
         </NavItem>
-
-
       </nav>
 
       {/* Footer / User Profile & Logout Area */}
       <div className={`px-4 pt-4 border-t border-gray-800/60`}>
         <div className="flex items-center gap-3">
           <img
-            // You can generate a simple avatar based on the user's name
             src={`https://ui-avatars.com/api/?name=${user?.name.replace(' ', '+')}&background=f59e0b&color=000`}
             alt={user?.name}
             className="w-10 h-10 rounded-full border-2 border-yellow-500/50"
@@ -87,7 +106,13 @@ const EmployeeSidebar = () => {
             <p className="text-xs text-gray-400 whitespace-nowrap">Employee</p>
           </div>
         </div>
-      <button className="w-full mt-4 mb-1 flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 text-red-400 hover:bg-red-500/10 hover:text-red-300">
+        <button 
+          onClick={handleLogout}
+          className={`w-full mt-4 mb-1 flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 
+                     text-red-400 hover:bg-red-500/10 hover:text-red-300 border-l-4 border-transparent hover:border-red-500
+                     ${isCollapsed ? 'justify-center' : ''}`}
+          title={isCollapsed ? 'Logout' : ''}
+        >
           <LogOut size={20} className="flex-shrink-0" />
           {!isCollapsed && <span className="font-medium whitespace-nowrap">Logout</span>}
         </button>
@@ -97,3 +122,4 @@ const EmployeeSidebar = () => {
 };
 
 export default EmployeeSidebar;
+

@@ -1,9 +1,15 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, UtensilsCrossed, Users, Building, Package, Currency, Bell } from 'lucide-react';
-
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, UtensilsCrossed, Users, Building, Package, Currency, Bell, LogOut } from 'lucide-react';
+import Cookies from 'js-cookie';
+import { useDispatch } from 'react-redux';
+import { resetUserDetails } from '../../redux/slice/userSlice'; // Adjust path to your userSlice
+import toast from 'react-hot-toast';
 
 const AdminSidebar = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const itemBase =
     'group flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors';
   const activeClasses =
@@ -14,8 +20,24 @@ const AdminSidebar = () => {
   const linkClasses = ({ isActive }) =>
     `${itemBase} ${isActive ? activeClasses : inactiveClasses}`;
 
+  const handleLogout = () => {
+    // Remove access token cookie
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    
+    // Clear Redux state
+    dispatch(resetUserDetails());
+    
+    
+    // Show success message
+    toast.success('Logged out successfully');
+    
+    // Redirect to login
+    navigate('/login');
+  };
+
   return (
-    <aside className="h-screen w-68 bg-linear-to-b from-black via-gray-950 to-black text-white shadow-xl border-r border-gray-800/60">
+    <aside className="h-screen w-68 bg-linear-to-b from-black via-gray-950 to-black text-white shadow-xl border-r border-gray-800/60 flex flex-col">
       {/* Brand */}
       <div className="px-4 py-5 border-b border-gray-800/60">
         <div className="flex items-center gap-3">
@@ -30,7 +52,7 @@ const AdminSidebar = () => {
       </div>
 
       {/* Nav */}
-      <nav className="px-3 py-4 space-y-6 overflow-y-auto h-[calc(100vh-140px)]">
+      <nav className="px-3 py-4 space-y-6 overflow-y-auto flex-1">
         {/* Section: Overview */}
         <div>
           <p className="px-2 mb-2 text-[11px] tracking-widest uppercase text-gray-500">
@@ -82,7 +104,6 @@ const AdminSidebar = () => {
                       }`}
                     />
                     <span>Restaurant Approval Requests</span>
-                   
                   </>
                 )}
               </NavLink>
@@ -102,7 +123,6 @@ const AdminSidebar = () => {
                 )}
               </NavLink>
             </li>
-
 
             <li>
               <NavLink to="/admin/users" className={linkClasses}>
@@ -188,8 +208,25 @@ const AdminSidebar = () => {
         </div>
       </nav>
 
+      {/* Logout Button */}
+      <div className="px-3 pb-4">
+        <button
+          onClick={handleLogout}
+          className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors
+                     text-gray-200 hover:text-white hover:bg-red-500/10 border border-transparent 
+                     hover:border-red-500/30"
+        >
+          <span className="h-5 w-1 rounded-full bg-transparent group-hover:bg-red-500 transition-colors" />
+          <LogOut
+            size={18}
+            className="text-gray-400 group-hover:text-red-400 transition-colors"
+          />
+          <span>Logout</span>
+        </button>
+      </div>
+
       {/* Footer */}
-      <div className="mt-auto border-t border-gray-800/60 px-4 py-4">
+      <div className="border-t border-gray-800/60 px-4 py-4">
         <div className="text-center">
           <p className="text-xs text-gray-500">&copy; {new Date().getFullYear()} Restauron</p>
           <p className="text-[10px] text-gray-600">v1.0.0</p>
@@ -200,3 +237,4 @@ const AdminSidebar = () => {
 };
 
 export default AdminSidebar;
+
