@@ -50,7 +50,7 @@ function LoginCommon() {
 
   const handleSignupClick = () => {
     dispatch(setSignupOption('restaurant')); 
-    navigate('/');
+    navigate('/signup');
   };
 
   const handleSendResetLink = async (e) => {

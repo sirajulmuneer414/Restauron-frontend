@@ -6,6 +6,9 @@ import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
+const LandingPage = lazy(() =>
+  import("./components/public/LandingPage.jsx")
+);
 const OwnerSubscriptionHome = lazy(() =>
   import("./components/owner/subscriptionMangement/OwnerSubscriptionHome.jsx")
 );
@@ -160,7 +163,6 @@ const ResetPasswordPage = lazy(() =>
 // const OwnerOrderDetailPage
 // const
 
-OwnerOrderManagementPage
 
 function App() {
   const otpPermission = useSelector((state) => state.signupOption.otp);
@@ -187,7 +189,8 @@ function App() {
           >
         
         <Routes>
-           <Route path="/" element={<RestaurantSignup />} />
+          <Route path="/" element={<LandingPage />} />
+           <Route path="/signup" element={<RestaurantSignup />} />
            <Route path="/reset-password" element={<ResetPasswordPage />} />
             {otpPermission ? (
               <Route path="/otpVerification" element={<OtpVerifcationPage />} />
