@@ -75,7 +75,7 @@ const CustomerOrdersPage = () => {
             <p className="text-sm text-zinc-500 mt-6">
               Don't have an account?{' '}
               <Link
-                to="/signup"
+                to={`/public/login/${encryptedId}`}
                 className="text-amber-400 hover:text-amber-300 font-semibold transition-colors"
               >
                 Sign up here
@@ -89,7 +89,7 @@ const CustomerOrdersPage = () => {
 
   const OrderCard = ({ order }) => (
     <div
-      onClick={() => navigate(`/customer/orders/${order.encryptedOrderId}`)}
+      onClick={() => navigate(`/restaurant/${encryptedId}/orders/${order.encryptedOrderId}`)}
       className="group bg-gradient-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
                  rounded-2xl p-6 hover:border-amber-500/30 transition-all cursor-pointer"
     >
@@ -131,7 +131,7 @@ const CustomerOrdersPage = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-black bg-linear-to-r from-white to-amber-200 bg-clip-text text-transparent mb-2">
             My Orders
           </h1>
           <p className="text-zinc-400">Track your orders and leave reviews</p>
