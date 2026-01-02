@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Clock, Package, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useNavigate, Link, useParams } from 'react-router-dom';
+import { Clock, Package, ShoppingBag, ArrowRight, LogIn, Lock } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import { useCustomerService } from '../../services/customerService';
 import StatusBadge from '../../components/customer/StatusBadge';
 import toast from 'react-hot-toast';
@@ -11,10 +12,20 @@ const CustomerOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const customerService = useCustomerService();
+  const {encryptedId} = useParams();
+
+  // ✨ Check authentication status
+  const isAuthenticated = useSelector((state) => state.userSlice?.isAuthenticated);
+  const user = useSelector((state) => state.userSlice?.user);
 
   useEffect(() => {
-    fetchOrders();
-  }, [activeTab]);
+    // Only fetch orders if authenticated
+    if (isAuthenticated) {
+      fetchOrders();
+    } else {
+      setLoading(false);
+    }
+  }, [activeTab, isAuthenticated]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -29,10 +40,57 @@ const CustomerOrdersPage = () => {
     }
   };
 
+  // ✨ Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/20 rounded-2xl p-8 text-center">
+            {/* Lock Icon */}
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 border-2 border-amber-500/30 mb-6">
+              <Lock className="text-amber-400" size={40} />
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-2xl font-black text-white mb-3">
+              Authentication Required
+            </h2>
+            <p className="text-zinc-400 mb-8">
+              Please log in to view your orders and track their status
+            </p>
+
+            {/* Login Button */}
+            <Link
+              to={`/public/login/${encryptedId}`}
+              className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 
+                       bg-linear-to-r from-amber-500 to-yellow-600 text-black font-bold 
+                       rounded-xl hover:from-amber-400 hover:to-yellow-500 transition-all 
+                       shadow-lg hover:shadow-amber-500/25"
+            >
+              <LogIn size={20} />
+              Login to Continue
+            </Link>
+
+            {/* Signup Link */}
+            <p className="text-sm text-zinc-500 mt-6">
+              Don't have an account?{' '}
+              <Link
+                to="/signup"
+                className="text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+              >
+                Sign up here
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const OrderCard = ({ order }) => (
     <div
       onClick={() => navigate(`/customer/orders/${order.encryptedOrderId}`)}
-      className="group bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
+      className="group bg-gradient-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
                  rounded-2xl p-6 hover:border-amber-500/30 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-4">
@@ -73,7 +131,7 @@ const CustomerOrdersPage = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-black bg-linear-to-r from-white to-amber-200 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-black bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent mb-2">
             My Orders
           </h1>
           <p className="text-zinc-400">Track your orders and leave reviews</p>
@@ -136,3 +194,4 @@ const CustomerOrdersPage = () => {
 };
 
 export default CustomerOrdersPage;
+
