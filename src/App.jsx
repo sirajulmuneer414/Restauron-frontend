@@ -6,6 +6,12 @@ import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
+const CustomerOrdersPage = lazy(() =>
+  import("./components/customer/CustomerOrdersPage.jsx")
+);
+const CustomerOrderDetailPage = lazy(() =>
+  import("./components/customer/CustomerOrderDetailPage.jsx")
+);
 const LandingPage = lazy(() =>
   import("./components/public/LandingPage.jsx")
 );
@@ -379,6 +385,8 @@ function App() {
               <Route path="home" element={<RestaurantHomePage />} />
               <Route path="menu" element={<CustomerMenuPage/>} />
               <Route path="confirm-order" element={<OrderConfirmationPage /> } />
+              <Route path="orders" element={<CustomerOrdersPage />} />
+              <Route path="orders/:orderId" element={<CustomerOrderDetailPage />} />
 
             </Route>
 

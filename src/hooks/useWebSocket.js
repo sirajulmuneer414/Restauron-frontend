@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import { Client } from "@stomp/stompjs";
-import { useSelector } from "react-redux"; // Assuming you use Redux for user state
+import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import notificationSound from '../assets/notification.mp3.wav';
-// Import SockJS
 import SockJS from 'sockjs-client';
 import useOrderAlert from "./useOrderAlert";
 
-// Change URL to http (SockJS uses http to handshake)
 const SOCKET_URL = (import.meta.env.VITE_API_BASE_URL 
     ? import.meta.env.VITE_API_BASE_URL 
     : "http://localhost:8081") + "/ws-restauron";
-
 
 export const useWebSocket = () => {
   const [notifications, setNotifications] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const clientRef = useRef(null);
   const playOrderAlert = useOrderAlert();
+  
+  // Store subscriptions for dynamic topics (like order status updates)
+  const subscriptionsRef = useRef({});
 
   const user = useSelector((state) => state.userSlice?.user);
   const token = Cookies.get("accessToken");
@@ -26,9 +26,7 @@ export const useWebSocket = () => {
   useEffect(() => {
     if (!user || !token) return;
 
-    // Create the client
     const client = new Client({
-      // 1. Use webSocketFactory for SockJS
       webSocketFactory: () => new SockJS(SOCKET_URL), 
       
       connectHeaders: {
@@ -42,34 +40,34 @@ export const useWebSocket = () => {
         console.log("✅ WebSocket Connected");
         setIsConnected(true);
 
-        // ... subscriptions remain the same ...
+        // User-specific notifications
         client.subscribe(`/user/${user.email}/queue/notifications`, (message) => {
-             const notification = JSON.parse(message.body);
-             handleNewNotification(notification);
+          const notification = JSON.parse(message.body);
+          handleNewNotification(notification);
         });
         
+        // Global announcements
         client.subscribe("/topic/announcements", (message) => {
-             const announcement = JSON.parse(message.body);
-             handleNewNotification({ ...announcement, type: "ANNOUNCEMENT" });
+          const announcement = JSON.parse(message.body);
+          handleNewNotification({ ...announcement, type: "ANNOUNCEMENT" });
         });
 
-        if(user.role.toLowerCase() === 'owner'){
-        client.subscribe("/topic/owners", (message) => {
-             const announcement = JSON.parse(message.body);
-             handleNewNotification({ ...announcement, type: "OWNER_ALERT" });
-        });
-      }
+        // Owner-specific alerts
+        if (user.role.toLowerCase() === 'owner') {
+          client.subscribe("/topic/owners", (message) => {
+            const announcement = JSON.parse(message.body);
+            handleNewNotification({ ...announcement, type: "OWNER_ALERT" });
+          });
+        }
 
-           // 5. Subscribe to New Orders (Restaurant Specific)
-            if (restaurantId && (user.role.toLowerCase() == 'admin'|| user.role.toLowerCase() == 'employee')) {
-                console.log(`Subscribing to orders for Restaurant: ${restaurantId}`);
-                client.subscribe(`/topic/restaurant/${restaurantId}/orders`, (message) => {
-                    const orderData = JSON.parse(message.body);
-                    handleNewOrder(orderData);
-                });
-              }
-
-
+        // Restaurant-specific orders (for admin/employee)
+        if (restaurantId && (user.role.toLowerCase() === 'admin' || user.role.toLowerCase() === 'employee')) {
+          console.log(`Subscribing to orders for Restaurant: ${restaurantId}`);
+          client.subscribe(`/topic/restaurant/${restaurantId}/orders`, (message) => {
+            const orderData = JSON.parse(message.body);
+            handleNewOrder(orderData);
+          });
+        }
       },
 
       onDisconnect: () => {
@@ -92,41 +90,77 @@ export const useWebSocket = () => {
     };
   }, [user, token, restaurantId]);
 
- 
   const handleNewNotification = (newMsg) => {
-    // Add timestamp if missing
     const msgWithTime = { ...newMsg, receivedAt: new Date() };
-
     setNotifications((prev) => [msgWithTime, ...prev]);
 
-    // Sound here
+    // Play sound
     const audio = new Audio(notificationSound);
-    audio.play();
+    audio.play().catch(err => console.log('Audio play failed:', err));
   };
 
-      const handleNewOrder = (messagePayload) => {
-        // 1. Determine the type (Default to 'NEW_ORDER' if backend didn't send one)
-        const type = messagePayload.type || 'NEW_ORDER';
+  const handleNewOrder = (messagePayload) => {
+    const type = messagePayload.type || 'NEW_ORDER';
 
-        // 2. Construct the notification object
-        const notification = {
-            ...messagePayload,
-            type: type, 
-            title: type === 'REFRESH_ORDERS' ? 'Update Received' : 'New Order Received!',
-            message: type === 'REFRESH_ORDERS' 
-                ? 'Syncing data...' 
-                : `Order #${messagePayload.orderId || '?'} - Table ${messagePayload.tableNumber || '?'}`,
-            receivedAt: new Date()
-        };
-
-        setNotifications((prev) => [notification, ...prev]);
-
-        // 3. Play Sound ONLY for actual New Orders (ignore silent refreshes)
-        if (type === 'NEW_ORDER' || type === 'ORDER_ALERT') {
-             playOrderAlert(`New order received.`);
-        }
+    const notification = {
+      ...messagePayload,
+      type: type, 
+      title: type === 'REFRESH_ORDERS' ? 'Update Received' : 'New Order Received!',
+      message: type === 'REFRESH_ORDERS' 
+        ? 'Syncing data...' 
+        : `Order #${messagePayload.orderId || '?'} - Table ${messagePayload.tableNumber || '?'}`,
+      receivedAt: new Date()
     };
 
+    setNotifications((prev) => [notification, ...prev]);
+
+    if (type === 'NEW_ORDER' || type === 'ORDER_ALERT') {
+      playOrderAlert(`New order received.`);
+    }
+  };
+
+  // **NEW: Subscribe to specific order status updates**
+  const subscribeToOrder = (orderId, callback) => {
+    if (!clientRef.current || !isConnected) {
+      console.warn('WebSocket not connected, cannot subscribe to order:', orderId);
+      return null;
+    }
+
+    const topic = `/topic/order/${orderId}`;
+    
+    // Check if already subscribed
+    if (subscriptionsRef.current[topic]) {
+      console.log(`Already subscribed to ${topic}`);
+      return subscriptionsRef.current[topic];
+    }
+
+    console.log(`✅ Subscribing to order updates: ${topic}`);
+    
+    const subscription = clientRef.current.subscribe(topic, (message) => {
+      try {
+        const orderUpdate = JSON.parse(message.body);
+        console.log('📦 Order update received:', orderUpdate);
+        callback(orderUpdate);
+      } catch (error) {
+        console.error('Error parsing order update:', error);
+      }
+    });
+
+    subscriptionsRef.current[topic] = subscription;
+    return subscription;
+  };
+
+  // **NEW: Unsubscribe from order updates**
+  const unsubscribeFromOrder = (orderId) => {
+    const topic = `/topic/order/${orderId}`;
+    const subscription = subscriptionsRef.current[topic];
+    
+    if (subscription) {
+      console.log(`❌ Unsubscribing from ${topic}`);
+      subscription.unsubscribe();
+      delete subscriptionsRef.current[topic];
+    }
+  };
 
   const clearNotifications = () => {
     setNotifications([]);
@@ -136,5 +170,8 @@ export const useWebSocket = () => {
     isConnected,
     notifications,
     clearNotifications,
+    subscribeToOrder,
+    unsubscribeFromOrder,
   };
 };
+

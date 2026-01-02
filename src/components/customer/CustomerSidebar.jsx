@@ -109,6 +109,7 @@ const CustomerSidebar = ({ isCollapsed = false, setIsCollapsed }) => {
       <nav className="grow px-4 py-6 space-y-2">
         <NavItem to={`/restaurant/${encryptedId}/home`} icon={Home}>Home</NavItem>
         <NavItem to={`/restaurant/${encryptedId}/menu`} icon={MenuIcon}>Menu</NavItem>
+        <NavItem to={`/restaurant/${encryptedId}/orders`} icon={ShoppingCart}>Orders</NavItem>
         {/* <NavItem to={`/restaurant/${encryptedId}/contact`} icon={Phone}>Contact</NavItem>
         <NavItem to={`/restaurant/${encryptedId}/cart`} icon={ShoppingCart}>Cart</NavItem> */}
       </nav>

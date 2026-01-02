@@ -11,12 +11,10 @@ import {
     AlertTriangle 
 } from 'lucide-react';
 
-// Use the hook we created earlier
-
 import { useOwnerService } from '../../../services/ownerService';
+import RestaurantQRCodeCard from '../dashboard/RestaurantQRCodeCard'; // ✨ NEW IMPORT
 
 const OwnerDashboard = () => {
-    // Initialize the service hook
     const ownerService = useOwnerService();
 
     const [loading, setLoading] = useState(true);
@@ -25,6 +23,7 @@ const OwnerDashboard = () => {
     const [orders, setOrders] = useState([]);
     const [employeeCount, setEmployeeCount] = useState(0);
     const [topItems, setTopItems] = useState([]);
+    const [restaurantLink, setRestaurantLink] = useState(null); // ✨ NEW STATE
 
     useEffect(() => {
         fetchDashboardData();
@@ -32,13 +31,13 @@ const OwnerDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            // Fetch all data in parallel
-            const [salesData, subData, ordersData, empData, itemsData] = await Promise.all([
+            const [salesData, subData, ordersData, empData, itemsData, linkData] = await Promise.all([
                 ownerService.getSalesStats(),
                 ownerService.getSubscriptionStatus(),
                 ownerService.getRecentOrders(),
                 ownerService.getEmployeeCount(),
-                ownerService.getTopItems()
+                ownerService.getTopItems(),
+                ownerService.getRestaurantCustomerLink() // ✨ NEW API CALL
             ]);
 
             setSales(salesData || { today: 0, week: 0, month: 0, year: 0 });
@@ -46,8 +45,8 @@ const OwnerDashboard = () => {
             setOrders(ordersData || []);
             setEmployeeCount(empData || 0);
             setTopItems(itemsData || []);
-            
-            // Subscription Warning Toast
+            setRestaurantLink(linkData); // ✨ NEW
+
             if (subData && subData.status === 'ACTIVE' && subData.daysLeft <= 5) {
                 toast('Reminder: Subscription expires in ' + subData.daysLeft + ' days!', {
                     icon: '⚠️',
@@ -59,7 +58,6 @@ const OwnerDashboard = () => {
                     },
                 });
             }
-
         } catch (error) {
             console.error("Error loading dashboard", error);
             toast.error("Failed to load dashboard data. Please check your connection.");
@@ -95,7 +93,7 @@ const OwnerDashboard = () => {
                 </div>
             </div>
 
-            {/* 1. KEY METRICS GRID */}
+            {/* KEY METRICS GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard 
                     title="Today's Sales" 
@@ -130,7 +128,7 @@ const OwnerDashboard = () => {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                {/* 2. LEFT COLUMN: RECENT ORDERS (Updated for DTO) */}
+                {/* LEFT COLUMN: RECENT ORDERS */}
                 <div className="lg:col-span-2 space-y-8">
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
@@ -176,7 +174,7 @@ const OwnerDashboard = () => {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <Link 
-                                                        to={`/owner/orders/₹{order.encryptedOrderId}`} 
+                                                        to={`/owner/orders/${order.encryptedOrderId}`} 
                                                         className="text-indigo-600 hover:text-indigo-900 font-medium text-xs border border-indigo-200 px-3 py-1.5 rounded hover:bg-indigo-50 transition"
                                                     >
                                                         View
@@ -191,9 +189,14 @@ const OwnerDashboard = () => {
                     </div>
                 </div>
 
-                {/* 3. RIGHT COLUMN: SUBSCRIPTION & TOP ITEMS */}
+                {/* RIGHT COLUMN: QR CODE, SUBSCRIPTION & TOP ITEMS */}
                 <div className="space-y-8">
                     
+                    {/* ✨ NEW: QR Code Card */}
+                    {restaurantLink && (
+                        <RestaurantQRCodeCard restaurantLink={restaurantLink} />
+                    )}
+
                     {/* Subscription Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-hidden">
                         <div className="flex items-center gap-3 mb-5">
@@ -218,16 +221,15 @@ const OwnerDashboard = () => {
                             <div>
                                 <div className="flex justify-between items-end mb-3">
                                     <span className="text-2xl font-bold text-gray-900">{subscription.planName}</span>
-                                    <span className={`px-2.5 py-1 rounded text-xs font-bold border ₹{subscription.daysLeft <= 5 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                                    <span className={`px-2.5 py-1 rounded text-xs font-bold border ${subscription.daysLeft <= 5 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
                                         {subscription.daysLeft} days left
                                     </span>
                                 </div>
                                 
-                                {/* Progress Bar */}
                                 <div className="w-full bg-gray-100 rounded-full h-2.5 mb-4">
                                     <div 
-                                        className={`h-2.5 rounded-full transition-all duration-500 ₹{subscription.daysLeft <= 5 ? 'bg-red-500' : 'bg-indigo-600'}`} 
-                                        style={{ width: `₹{Math.min((subscription.daysLeft / 30) * 100, 100)}%` }}
+                                        className={`h-2.5 rounded-full transition-all duration-500 ${subscription.daysLeft <= 5 ? 'bg-red-500' : 'bg-indigo-600'}`} 
+                                        style={{ width: `${Math.min((subscription.daysLeft / 30) * 100, 100)}%` }}
                                     ></div>
                                 </div>
                                 
@@ -243,7 +245,7 @@ const OwnerDashboard = () => {
                         )}
                     </div>
 
-                    {/* Top Selling Items Widget (Updated for DTO) */}
+                    {/* Top Selling Items Widget */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-gray-800 mb-4">Top Selling Dishes</h2>
                         <div className="space-y-1">
@@ -253,7 +255,7 @@ const OwnerDashboard = () => {
                                 topItems.map((item, index) => (
                                     <div key={index} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition cursor-default group">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ₹{index === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${index === 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500'}`}>
                                                 {index + 1}
                                             </div>
                                             <div>
@@ -279,8 +281,7 @@ const OwnerDashboard = () => {
     );
 };
 
-// --- Helper Components ---
-
+// Helper Components
 const StatCard = ({ title, value, icon, trend, color }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start justify-between hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
         <div>
@@ -288,7 +289,7 @@ const StatCard = ({ title, value, icon, trend, color }) => (
             <h3 className="text-2xl font-bold text-gray-900 mb-1 tracking-tight">{value}</h3>
             <p className="text-xs text-gray-400 font-medium">{trend}</p>
         </div>
-        <div className={`p-3 rounded-xl ₹{color} bg-opacity-20`}>
+        <div className={`p-3 rounded-xl ${color} bg-opacity-20`}>
             {icon}
         </div>
     </div>
@@ -303,7 +304,7 @@ const StatusBadge = ({ status }) => {
         READY: "bg-indigo-100 text-indigo-700 border-indigo-200"
     };
     return (
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ₹{styles[status] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${styles[status] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
             {status}
         </span>
     );

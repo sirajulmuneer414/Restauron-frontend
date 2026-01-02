@@ -30,6 +30,10 @@ export const useOwnerService = () => {
       const response = await axiosOwnerInstance.get("/subscription/packages");
       return response.data;
     },
+   getRestaurantCustomerLink: async () => {
+  const response = await axiosOwnerInstance.get('/dashboard/restaurant/customer-link');
+  return response.data;
+}, 
 
     // 2. Create Razorpay Order
     createPaymentOrder: async (packageId) => {
