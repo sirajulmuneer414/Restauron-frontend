@@ -1,4 +1,5 @@
-import useAxios from "../axiosinstances/axiosInstances";
+import { useAxios } from "../axios/instances/axiosInstances";
+
 
 export const useCustomerService = () => {
   const { axiosCustomerInstance } = useAxios();
