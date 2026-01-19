@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ListOrdered, PlusCircle, Search, Filter, Grid3x3, List, Calendar, User, CreditCard, Package } from 'lucide-react';
 import { Button } from '../../ui/button';
+import { useSelector } from 'react-redux';
 
 
 const OwnerOrderManagementPage = () => {
@@ -22,6 +23,9 @@ const OwnerOrderManagementPage = () => {
     const [filterType, setFilterType] = useState('ALL');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
     
 
     useEffect(() => {
@@ -191,6 +195,7 @@ const OwnerOrderManagementPage = () => {
                     <p className="text-gray-400 ml-16">Manage and track all your orders in one place</p>
                 </div>
                 <Button 
+                    disabled={isReadOnly}
                     onClick={() => navigate('/owner/orders/new')} 
                     className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2"
                 >

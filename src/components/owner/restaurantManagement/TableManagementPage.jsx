@@ -3,10 +3,11 @@ import { useReactToPrint } from 'react-to-print';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '../../ui/button';
-import { Plus, Trash2, QrCode, Link as LinkIcon, Check } from 'lucide-react';
+import { Trash2, QrCode, Link as LinkIcon, Check } from 'lucide-react';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 import Cookie from 'js-cookie';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
  // Assuming an owner-specific instance
 
@@ -78,6 +79,9 @@ const TableManagementPage = () => {
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
+  const user = useSelector((state) => state.userSlice.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
+
   // Fetch restaurantEncryptedId from cookies
 
   const restaurantEncryptedId = Cookie.get('restaurantId');
@@ -104,6 +108,10 @@ const TableManagementPage = () => {
   }, [fetchTables]);
 
   const handleCreateTable = async (e) => {
+    if (isReadOnly) {
+      toast.error("Cannot create table in Read-Only mode.");
+      return;
+    }
     e.preventDefault();
     if (!newTableName.trim()){
       setError('Table name cannot be empty.');
@@ -121,7 +129,11 @@ const TableManagementPage = () => {
   };
 
   const handleDeleteTable = async (tableEncryptedId) => {
-    if (!window.confirm('Are you sure you want to delete this table?')) return;
+    if (isReadOnly) {
+      toast.error("Cannot delete table in Read-Only mode.");
+      return;
+    }
+    if (!globalThis.confirm('Are you sure you want to delete this table?')) return;
     try {
       await axiosOwnerInstance.delete(`/tables/delete/${tableEncryptedId}`);
       fetchTables();

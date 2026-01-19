@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 import { User, Mail, Phone, CreditCard, Lock, AtSign, FileImage, UploadCloud } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 
 // --- Validation Schema ---
@@ -44,8 +46,16 @@ const AddEmployee = () => {
     const navigate = useNavigate();
     const [imagePreview, setImagePreview] = useState(null);
     const restaurantName = "Chillies"; // Replace with your actual data source
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
     const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+
+        if (isReadOnly) {
+            toast.error("Cannot add employee in Read-Only mode.");
+            setSubmitting(false);
+            return; // Prevent action in read-only mode     
+        }
         setSubmitting(true);
         try {
 

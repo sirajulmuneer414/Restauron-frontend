@@ -9,6 +9,8 @@ import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
 import { User, Mail, Phone, CreditCard, UploadCloud, ShieldAlert, ArrowLeft, Trash2, AlertTriangle } from 'lucide-react';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 // --- Validation Schema (No changes needed here) ---
 const EditEmployeeSchema = Yup.object().shape({
@@ -34,6 +36,9 @@ const EmployeeIndividualDetails = () => {
   // --- NEW: State for delete confirmation modal ---
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const user = useSelector((state) => state.userSlice?.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
   // --- Data Fetching (No changes needed) ---
   useEffect(() => {
@@ -63,6 +68,12 @@ const EmployeeIndividualDetails = () => {
 
   // --- Form Submission for Update (No changes needed) ---
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+
+    if(isReadOnly) {
+      toast.error("Cannot edit employee details in Read-Only mode.");
+      setSubmitting(false);
+      return; // Prevent action in read-only mode     
+    }
     // ... (This function remains the same as before)
     setSubmitting(true);
     setError(null);
@@ -88,6 +99,11 @@ const EmployeeIndividualDetails = () => {
 
   // --- NEW: Delete Handler ---
   const handleDelete = async () => {
+
+    if(isReadOnly) {
+      toast.error("Cannot delete employee in Read-Only mode.");
+      return; // Prevent action in read-only mode     
+    }
     setIsDeleting(true);
     setError(null);
     try {

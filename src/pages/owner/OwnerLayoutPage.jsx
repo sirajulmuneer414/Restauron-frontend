@@ -3,8 +3,12 @@ import OwnerSidebar from '../../components/owner/OwnerSideBar';
 import { Outlet } from 'react-router-dom';
 // Import the handler
 import NotificationHandler from '../../components/common/NotificationHandler';
+import { useSelector } from 'react-redux';
+import GracePeriodBanner from '../../components/common/GracePeriodBanner';
 
 function OwnerLayoutPage() {
+
+    const user = useSelector((state) => state.userSlice?.user);
     
     // It's cleaner to define the layout structure directly in the return
     // instead of defining a function inside a function.
@@ -15,7 +19,11 @@ function OwnerLayoutPage() {
             
             <OwnerSidebar />
             
+
+
             <main className="grow h-screen overflow-y-auto">
+
+                <GracePeriodBanner status={user?.status} />
                 <Outlet /> {/* Child routes will render here */}
             </main>
         </div>

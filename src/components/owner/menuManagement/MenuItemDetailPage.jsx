@@ -149,6 +149,9 @@ function MenuItemDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
+
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -171,6 +174,11 @@ function MenuItemDetailPage() {
     }, [fetchData]);
 
     const handleToggleAvailability = async () => {
+        if (isReadOnly) {
+            toast.error("Cannot change availability in Read-Only mode.");
+            return;
+        }
+
         try {
             // Simplified API call
             await axiosOwnerInstance.patch(`/menu/update-availability/${menuItemEncryptedId}`, { isAvailable: !item.available });
@@ -182,6 +190,11 @@ function MenuItemDetailPage() {
     };
 
     const handleDelete = async () => {
+        if (isReadOnly) {
+            toast.error("Cannot delete item in Read-Only mode.");
+            return;
+        }
+
         setIsDeleting(true);
         try {
             // Simplified API call
@@ -204,11 +217,11 @@ function MenuItemDetailPage() {
             <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
                 <div>
                     <h1 className="text-4xl font-bold">{item.name}</h1>
-                    <p className="text-lg text-yellow-400 font-semibold">${item.price.toFixed(2)}</p>
+                    <p className="text-lg text-yellow-400 font-semibold">₹{item.price.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button onClick={() => setIsEditModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"><Edit size={16}/> Edit</Button>
-                    <Button onClick={() => setIsDeleteModalOpen(true)} className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"><Trash size={16}/> Delete</Button>
+                    <Button disabled={isReadOnly} onClick={() => setIsEditModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"><Edit size={16}/> Edit</Button>
+                    <Button disabled={isReadOnly} onClick={() => setIsDeleteModalOpen(true)} className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"><Trash size={16}/> Delete</Button>
                 </div>
             </div>
 
