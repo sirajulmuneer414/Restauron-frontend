@@ -268,7 +268,7 @@ const POSPage = () => {
                             <option value="">Select Table...</option>
                             {tables.map(t => (
                                 <option key={t.tableId} value={t.tableId}>
-                                    Table - {t.name} - {t.status}
+                                    Table - {t.name} - {t.status} - Capacity: {t.capacity}
                                 </option>
                             ))}
                         </select>

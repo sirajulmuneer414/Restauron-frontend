@@ -4,7 +4,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL+"/api" || "http://localhost:8081/api";
+const BASE_URL = "http://localhost:8081/api";
 // --- Interceptor Logic ---
 const createAuthResponseInterceptor = (navigate) => async (error) => {
     const originalRequest = error.config;
