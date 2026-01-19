@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Save, Upload, Clock, MapPin, Type, Palette, Layout, RotateCcw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAxios } from '../../../axios/instances/axiosInstances';
@@ -26,6 +26,9 @@ const RestaurantSettings = () => {
     const [bannerFile, setBannerFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isFetching, setIsFetching] = useState(true);
+
+    const user = useSelector((state) => state.userSlice.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
     // 2. Watch specific fields for real-time UI updates
     const useManualOpen = watch('useManualOpen');
@@ -56,6 +59,11 @@ const RestaurantSettings = () => {
     }, [axiosOwnerInstance, setValue, dispatch]);
 
     const handleImageChange = (e) => {
+
+        if (isReadOnly) {
+            toast.error("Cannot change banner image in Read-Only mode.");
+            return;
+        }
         const file = e.target.files[0];
         if (file) {
             setBannerFile(file);
@@ -72,6 +80,10 @@ const RestaurantSettings = () => {
     };
 
     const onSubmit = async (data) => {
+        if (isReadOnly) {
+            toast.error("Cannot update settings in Read-Only mode.");
+            return;
+        }
         setIsLoading(true);
         try {
             const formData = new FormData();

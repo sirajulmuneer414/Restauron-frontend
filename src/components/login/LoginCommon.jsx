@@ -24,9 +24,8 @@ import { setOwnerDetails } from '../../redux/slice/ownerDetailsSlice';
 import { setWaitingForApprovalMessage } from '../../redux/slice/specialValues';
 
 function LoginCommon() {
-  const signupOption = useSelector((state) => state.signupOption.signupOption);
   const emailFromOtp = useSelector((state) => state.signupOption.otpEmail);
-  const { axiosLoginInstance, axiosInstances, axiosPublicInstance } = useAxios();
+  const { axiosLoginInstance, axiosInstances } = useAxios();
 
   // State Management
   const [isLoading, setIsLoading] = useState(false);
@@ -133,6 +132,8 @@ function LoginCommon() {
                       role: jwtDecoded.role,
                       userId: jwtDecoded.userId,
                       status: jwtDecoded.status,
+                      restaurantAccessLevel: jwtDecoded.accessLevelStatus,
+                      restaurantName: jwtDecoded.restaurantName,
                   }));
 
                   // Role-Based Redirects

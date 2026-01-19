@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search } from 'lucide-react';
 import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 function CategoryManagementList() {
     const navigate = useNavigate();
@@ -31,6 +33,9 @@ function CategoryManagementList() {
     const [newCategoryDescription, setNewCategoryDescription] = useState('');
     const [createError, setCreateError] = useState(null);
     const [isCreating, setIsCreating] = useState(false);
+
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
     // Debounce search input
     useEffect(() => {
@@ -99,6 +104,10 @@ function CategoryManagementList() {
     };
 
     const handleCreateCategory = async (e) => {
+        if (isReadOnly) {
+            toast.error("Cannot create category in Read-Only mode.");
+            return; // Prevent action in read-only mode
+        }
         e.preventDefault();
         if (!newCategoryName.trim()) {
             setCreateError("Category name cannot be empty.");
@@ -190,7 +199,7 @@ function CategoryManagementList() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={openCreateModal} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg flex items-center gap-2">
+                    <Button disabled={isReadOnly} onClick={openCreateModal} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg flex items-center gap-2">
                         <PlusCircle size={20} /> Create Category
                     </Button>
                 </div>

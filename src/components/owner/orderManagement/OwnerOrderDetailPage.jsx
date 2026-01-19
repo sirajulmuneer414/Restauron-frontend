@@ -6,6 +6,7 @@ import { ArrowLeft, Trash2, Edit, Printer,Plus } from 'lucide-react';
 import { Button } from '../../ui/button';
 import OrderItemModal from './OrderItemModal';
 import AddOrderItemModal from './AddOrderItemModal';
+import { useSelector } from 'react-redux';
 
 // --- Order Item Modal ---
 
@@ -52,6 +53,9 @@ const OwnerOrderDetailPage = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
 
+  const user = useSelector((state) => state.userSlice?.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
+
   const fetchMenuItems = async () => {
     try {
       const res = await axiosOwnerInstance.get('/menu-items/all'); // or your endpoint
@@ -81,6 +85,11 @@ const OwnerOrderDetailPage = () => {
 
   // --- Status update, deletion, print, etc. ---
   const handleStatusChange = async (newStatus) => {
+    if (isReadOnly) {
+      toast.error("Cannot change order status in Read-Only mode.");
+      return;
+    }
+
     if (!orderId || !order) return;
     const oldStatus = order.status;
     setOrder({ ...order, status: newStatus });
@@ -93,8 +102,12 @@ const OwnerOrderDetailPage = () => {
     }
   };
   const handleDeleteOrder = async () => {
+    if (isReadOnly) {
+      toast.error("Cannot delete order in Read-Only mode.");
+      return;
+    }
     if (!orderId) return;
-    if (window.confirm("Are you sure you want to delete this order permanently?")) {
+    if (globalThis.confirm("Are you sure you want to delete this order permanently?")) {
       try {
         await axiosOwnerInstance.delete(`/orders/${orderId}`);
         toast.success("Order deleted successfully.");
@@ -109,17 +122,25 @@ const OwnerOrderDetailPage = () => {
     style.innerHTML = printCSS;
     document.head.appendChild(style);
     document.getElementById("bill-print").style.display = "block";
-    window.print();
+    globalThis.print();
     document.getElementById("bill-print").style.display = "none";
     document.head.removeChild(style);
   };
 
   // ----- Edit, Add, Delete workflow for order items -----
   const openEditModal = (item) => {
+    if (isReadOnly) {
+      toast.error("Cannot edit item in Read-Only mode.");
+      return;
+    }
     setCurrentItem(item);
     setItemModalOpen(true);
   };
   const handleModalSave = (updatedItem) => {
+    if (isReadOnly) {
+      toast.error("Cannot edit item in Read-Only mode.");
+      return;
+    }
     // PATCH backend here if needed.
     setOrder((o) => ({
       ...o,
@@ -138,6 +159,10 @@ const OwnerOrderDetailPage = () => {
     toast.success("Item updated.");
   };
   const handleModalDelete = (item) => {
+    if (isReadOnly) {
+      toast.error("Cannot delete item in Read-Only mode.");
+      return;
+    }
     // DELETE the item in your backend if required.
     setOrder((o) => ({
       ...o,
@@ -152,10 +177,18 @@ const OwnerOrderDetailPage = () => {
     toast.success("Item removed.");
   };
   const handleAddItemClick = async () => {
+    if (isReadOnly) {
+      toast.error("Cannot add item in Read-Only mode.");
+      return;
+    }
     await fetchMenuItems();
     setAddModalOpen(true);
   };
   const handleAddItem = (newItem) => {
+    if (isReadOnly) {
+      toast.error("Cannot add item in Read-Only mode.");
+      return;
+    }
     setOrder((o) => ({
       ...o,
       items: [...o.items, newItem],

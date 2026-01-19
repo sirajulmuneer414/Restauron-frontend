@@ -5,6 +5,7 @@ import { Button } from '../../ui/button';
 import AddReservationModal from './AddReservationModal';
 import ReservationDetailsModal from './ReservationDetailsModal';
 import { useAxios } from '../../../axios/instances/axiosInstances';
+import { useSelector } from 'react-redux';
 
 function ReservationManagementPage() {
   const { axiosOwnerInstance } = useAxios();
@@ -31,6 +32,9 @@ function ReservationManagementPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const user = useSelector((state) => state.userSlice.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
   // Debounce
   useEffect(() => {
@@ -146,6 +150,7 @@ function ReservationManagementPage() {
           <p className="text-gray-400">Handle bookings, search/filter, and manage availability and details.</p>
         </div>
         <Button
+          disabled={isReadOnly}
           className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
           onClick={() => navigate('/owner/reservations/availability-setup')}
         >
@@ -200,6 +205,7 @@ function ReservationManagementPage() {
             </button>
           </div>
           <Button
+            disabled={isReadOnly}
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg"
             onClick={() => setShowAddModal(true)}
           >

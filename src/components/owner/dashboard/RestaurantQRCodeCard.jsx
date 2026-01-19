@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download, Copy, ExternalLink, Check } from 'lucide-react';
 import toast from 'react-hot-toast';

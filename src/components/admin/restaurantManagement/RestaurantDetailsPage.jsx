@@ -9,18 +9,27 @@ import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 
 // --- Reusable DetailItem Component ---
-const DetailItem = ({ icon: Icon, label, value, isLink = false, to = '#', isStatus = false }) => (
+
+const DetailItem = ({ icon: Icon, label, value, isLink = false, to = '#', badgeVariant }) => (
     <div className="flex flex-col gap-1">
         <label className="text-xs text-gray-400 font-semibold uppercase flex items-center gap-2">
             <Icon size={14} />{label}
         </label>
-        {isStatus ? (
-            <span className={`mt-1 px-2.5 py-1 text-xs font-semibold rounded-full border self-start ${
-                value === 'ACTIVE' ? 'bg-green-600/20 text-green-300 border-green-700/50' :
-                value === 'NONACTIVE' ? 'bg-red-600/20 text-red-300 border-red-700/50' :
-                'bg-amber-500/20 text-amber-300 border-amber-600/40'
-            }`}>
-                {value}
+
+        {badgeVariant ? (
+            <span className={`mt-1 px-2.5 py-1 text-xs font-semibold rounded-full border self-start ${badgeVariant === 'account' ? (
+                    value === 'ACTIVE' ? 'bg-green-600/20 text-green-300 border-green-700/50' :
+                        value === 'NONACTIVE' ? 'bg-red-600/20 text-red-300 border-red-700/50' :
+                            'bg-amber-500/20 text-amber-300 border-amber-600/40'
+                ) : (
+                    value === 'FULL' ? 'bg-green-600/20 text-green-300 border-green-700/50' :
+                        value === 'PARTIAL' ? 'bg-amber-500/20 text-amber-300 border-amber-600/40' :
+                            value === 'READ_ONLY' ? 'bg-orange-600/20 text-orange-300 border-orange-700/40' :
+                                value === 'BLOCKED' ? 'bg-red-600/20 text-red-300 border-red-700/50' :
+                                    'bg-gray-600/20 text-gray-300 border-gray-700/50'
+                )
+                }`}>
+                {value || 'N/A'}
             </span>
         ) : isLink ? (
             <Link to={to} className="text-amber-400 hover:underline">{value || 'N/A'}</Link>
@@ -30,14 +39,15 @@ const DetailItem = ({ icon: Icon, label, value, isLink = false, to = '#', isStat
     </div>
 );
 
+
 // --- Yup Validation Schema for Edit Modal ---
 const EditRestaurantSchema = Yup.object().shape({
-  name: Yup.string().min(2, 'Too Short!').required('Name is required'),
-  phone: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Phone is required'),
-  address: Yup.string().required('Address is required'),
-  district: Yup.string().required('District is required'),
-  state: Yup.string().required('State is required'),
-  pincode: Yup.string().matches(/^[0-9]{6}$/, 'Must be 6 digits').required('Pincode is required'),
+    name: Yup.string().min(2, 'Too Short!').required('Name is required'),
+    phone: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Phone is required'),
+    address: Yup.string().required('Address is required'),
+    district: Yup.string().required('District is required'),
+    state: Yup.string().required('State is required'),
+    pincode: Yup.string().matches(/^[0-9]{6}$/, 'Must be 6 digits').required('Pincode is required'),
 });
 
 // --- Edit Restaurant Modal Component ---
@@ -65,10 +75,10 @@ const EditRestaurantModal = ({ restaurant, isOpen, onClose, onSave }) => {
                         <Form className="space-y-4">
                             <Field name="name" placeholder="Restaurant Name" className="w-full bg-black/50 border border-gray-700 p-2 rounded-md text-white" />
                             <ErrorMessage name="name" component="div" className="text-red-400 text-sm" />
-                            
+
                             <Field name="phone" placeholder="Phone Number" className="w-full bg-black/50 border border-gray-700 p-2 rounded-md text-white" />
                             <ErrorMessage name="phone" component="div" className="text-red-400 text-sm" />
-                            
+
                             <Field name="address" placeholder="Address" className="w-full bg-black/50 border border-gray-700 p-2 rounded-md text-white" />
                             <ErrorMessage name="address" component="div" className="text-red-400 text-sm" />
 
@@ -77,9 +87,9 @@ const EditRestaurantModal = ({ restaurant, isOpen, onClose, onSave }) => {
                                 <Field name="state" placeholder="State" className="w-full bg-black/50 border border-gray-700 p-2 rounded-md text-white" />
                                 <Field name="pincode" placeholder="Pincode" className="w-full bg-black/50 border border-gray-700 p-2 rounded-md text-white" />
                             </div>
-                             <ErrorMessage name="district" component="div" className="text-red-400 text-sm" />
-                             <ErrorMessage name="state" component="div" className="text-red-400 text-sm" />
-                             <ErrorMessage name="pincode" component="div" className="text-red-400 text-sm" />
+                            <ErrorMessage name="district" component="div" className="text-red-400 text-sm" />
+                            <ErrorMessage name="state" component="div" className="text-red-400 text-sm" />
+                            <ErrorMessage name="pincode" component="div" className="text-red-400 text-sm" />
 
                             <div className="flex justify-end gap-4 pt-4">
                                 <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
@@ -99,13 +109,15 @@ const EditRestaurantModal = ({ restaurant, isOpen, onClose, onSave }) => {
 const RestaurantDetailsPage = () => {
     const { encryptedId } = useParams();
     const navigate = useNavigate();
-    const {axiosAdminInstance} = useAxios();
+    const { axiosAdminInstance } = useAxios();
 
     const [restaurant, setRestaurant] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [accessLevelDraft, setAccessLevelDraft] = useState('');
+
 
     const fetchDetails = useCallback(async () => {
         setIsLoading(true);
@@ -123,6 +135,10 @@ const RestaurantDetailsPage = () => {
         fetchDetails();
     }, [fetchDetails]);
 
+    useEffect(() => {
+        if (restaurant?.accessLevel) setAccessLevelDraft(restaurant.accessLevel);
+    }, [restaurant]);
+
     const handleUpdateStatus = async () => {
         const newStatus = restaurant.status === 'ACTIVE' ? 'block' : 'unblock';
         try {
@@ -132,7 +148,19 @@ const RestaurantDetailsPage = () => {
             toast.error(`Failed to ${newStatus} restaurant.`);
         }
     };
-    
+
+    const handleUpdateAccessLevel = async () => {
+        try {
+            await axiosAdminInstance.post(`/restaurants/access-level/${encryptedId}`, {
+                accessLevel: accessLevelDraft,
+            });
+            toast.success("Access level updated.");
+            fetchDetails();
+        } catch (err) {
+            toast.error("Failed to update access level.");
+        }
+    };
+
     const handleEditSave = async (values, { setSubmitting }) => {
         try {
             await axiosAdminInstance.put(`/restaurants/update/${encryptedId}`, values);
@@ -181,6 +209,38 @@ const RestaurantDetailsPage = () => {
                             {restaurant.status === 'ACTIVE' ? <Lock size={16} className="mr-2" /> : <Unlock size={16} className="mr-2" />}
                             {restaurant.status === 'ACTIVE' ? 'Block' : 'Unblock'}
                         </Button>
+                        <div className="bg-black/40 border border-gray-800 rounded-xl p-5 mt-6">
+                            <h2 className="text-sm font-bold text-gray-200 mb-3">Subscription Access Control</h2>
+
+                            <div className="flex flex-col md:flex-row gap-3 md:items-center">
+                                <select
+                                    value={accessLevelDraft}
+                                    onChange={(e) => setAccessLevelDraft(e.target.value)}
+                                    className="bg-black/70 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:border-amber-500"
+                                    disabled={restaurant.status === 'NONACTIVE'}
+                                >
+                                    <option value="FULL">FULL</option>
+                                    <option value="PARTIAL">PARTIAL</option>
+                                    <option value="READ_ONLY">READ_ONLY</option>
+                                    <option value="BLOCKED">BLOCKED</option>
+                                </select>
+
+                                <Button
+                                    onClick={handleUpdateAccessLevel}
+                                    disabled={!accessLevelDraft || accessLevelDraft === restaurant.accessLevel || restaurant.status === 'NONACTIVE'}
+                                    className="bg-amber-500 text-black hover:bg-amber-600"
+                                >
+                                    Save Access Level
+                                </Button>
+
+                                {restaurant.status === 'NONACTIVE' && (
+                                    <p className="text-xs text-red-300">
+                                        Restaurant is blocked at account level. Unblock first to manage access level.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -197,14 +257,15 @@ const RestaurantDetailsPage = () => {
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <DetailItem icon={User} label="Owner" value={restaurant.ownerName} isLink={true} to={`/admin/users/detail/${restaurant.ownerEncryptedUserId}`} />
                         <DetailItem icon={Phone} label="Contact Phone" value={restaurant.phone} />
-                        <DetailItem icon={Shield} label="Status" value={restaurant.status} isStatus={true} />
+                        <DetailItem icon={Shield} label="Status" value={restaurant.status} badgeVariant="account" />
+                        <DetailItem icon={Shield} label="Access Level" value={restaurant.accessLevel} badgeVariant="access" />
                         <DetailItem icon={MapPin} label="Full Address" value={fullAddress} />
                     </div>
                 </div>
             </div>
 
             <EditRestaurantModal restaurant={restaurant} isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} onSave={handleEditSave} />
-            
+
             {isDeleteModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
                     <div className="bg-gray-900 border border-red-500/50 rounded-xl p-8 max-w-md w-full">

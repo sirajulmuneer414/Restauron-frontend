@@ -90,7 +90,7 @@ const CustomerOrdersPage = () => {
   const OrderCard = ({ order }) => (
     <div
       onClick={() => navigate(`/restaurant/${encryptedId}/orders/${order.encryptedOrderId}`)}
-      className="group bg-gradient-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
+      className="group bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
                  rounded-2xl p-6 hover:border-amber-500/30 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-4">

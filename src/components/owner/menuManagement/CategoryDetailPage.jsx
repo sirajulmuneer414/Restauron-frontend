@@ -4,6 +4,8 @@ import { Edit, Trash, Package, Utensils, AlertTriangle } from 'lucide-react';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import Cookie from 'js-cookie';
 import { Button } from '../../ui/button';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 // --- Reusable Pagination Component ---
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
@@ -182,6 +184,9 @@ function CategoryDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
+
     const getStatusStyles = (status) => {
         switch (status) {
             case 'AVAILABLE': return 'bg-green-500/20 text-green-300 border-green-600/50';
@@ -229,6 +234,10 @@ function CategoryDetailPage() {
 
     // --- Handlers for Edit, Delete (remain the same) ---
     const handleSaveChanges = async (updatedData) => {
+        if (isReadOnly) {
+            toast.error("Cannot edit category in Read-Only mode.");
+            return; // Prevent action in read-only mode     
+        }
 
         await axiosOwnerInstance.put(`/category/update/${categoryEncryptedId}`, {
             name: updatedData.name,
@@ -244,6 +253,10 @@ function CategoryDetailPage() {
 
 
     const handleDeleteCategory = async () => {
+        if (isReadOnly) {
+            toast.error("Cannot delete category in Read-Only mode.");
+            return; // Prevent action in read-only mode     
+        }
         setIsDeleting(true);
         try {
 

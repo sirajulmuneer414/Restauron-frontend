@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { User, Phone, CreditCard, Eye, Search, Filter, List, Grid } from 'lucide-react';
 import { useAxios } from '../../../axios/instances/axiosInstances';
 import { Button } from '../../ui/button';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 function EmployeeManagementList() {
   const navigate = useNavigate();
@@ -26,6 +28,9 @@ function EmployeeManagementList() {
   const [filter, setFilter] = useState('ALL'); // Default to all statuses
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const user = useSelector((state) => state.userSlice?.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
   // Debounce search input
   useEffect(() => {
@@ -80,6 +85,10 @@ function EmployeeManagementList() {
     navigate(`/owner/employees/detail/${encryptedId}`);
   };
   const onAddEmployeeButtonClick = () => {
+    if(isReadOnly) {
+      toast.error("Cannot add employee in Read-Only mode.");
+      return; // Prevent action in read-only mode     
+    }
     navigate('/owner/employees/add');
   }
   
@@ -188,7 +197,7 @@ function EmployeeManagementList() {
                 <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-yellow-500 text-black' : 'hover:bg-gray-700'}`}><Grid size={20}/></button>
                 <button onClick={() => setViewMode('list')} className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-yellow-500 text-black' : 'hover:bg-gray-700'}`}><List size={20}/></button>
             </div>
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg" onClick = {() => onAddEmployeeButtonClick()}>
+            <Button disabled={isReadOnly} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2.5 px-4 rounded-lg" onClick = {() => onAddEmployeeButtonClick()}>
                 + Add Employee
             </Button>
         </div>

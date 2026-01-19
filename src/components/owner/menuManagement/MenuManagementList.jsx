@@ -167,6 +167,8 @@ const handleSubmit = async (e) => {
 // --- Main List Component ---
 function MenuItemManagementList() {
     const navigate = useNavigate();
+    const user = useSelector((state) => state.userSlice?.user);
+    
 
     // Data states
     const [menuItems, setMenuItems] = useState([]);
@@ -181,6 +183,8 @@ function MenuItemManagementList() {
     const [totalPages, setTotalPages] = useState(0);
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
     useEffect(() => {
         const timer = setTimeout(() => { setDebouncedSearch(search.trim()); setPage(0); }, 350);
@@ -218,7 +222,7 @@ function MenuItemManagementList() {
                     <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by item name..."
                         className="w-full bg-black/70 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5"/>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold flex items-center gap-2">
+                <Button disabled={isReadOnly} onClick={() => setIsCreateModalOpen(true)} className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold flex items-center gap-2">
                     <PlusCircle size={20} /> Add Menu Item
                 </Button>
             </div>
@@ -241,11 +245,11 @@ function MenuItemManagementList() {
                                     <img src={item.imageUrl || `https://via.placeholder.com/40`} alt={item.name} className="w-10 h-10 rounded-md object-cover"/>
                                     <div>
                                         <div className="font-bold">{item.name}</div>
-                                        <div className="text-xs text-gray-400">{item.isVegetarian ? 'Veg' : 'Non-Veg'}</div>
+                                        <div className="text-xs text-gray-400">{item.vegetarian ? 'Veg' : 'Non-Veg'}</div>
                                     </div>
                                 </td>
                                 <td className="p-4 text-gray-300">{item.categoryName}</td>
-                                <td className="p-4 text-gray-300">${item.price.toFixed(2)}</td>
+                                <td className="p-4 text-gray-300">₹{item.price.toFixed(2)}</td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 text-xs rounded-full ${item.available ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
                                         {item.available ? 'Available' : 'Unavailable'}

@@ -6,6 +6,12 @@ import CommonLoadingSpinner from "./components/loadingAnimations/CommonLoading";
 import ErrorFallback from "./components/errorsAndCommon/ErrorFallback";
 import { ErrorBoundary } from "react-error-boundary";
 
+const RestaurantAccessGuard = lazy(() =>
+  import("./components/auth/RestaurantAccessGuard.jsx")
+);
+const ServiceSuspendedPage = lazy(() =>
+  import("./pages/common/ServiceSuspendedPage.jsx")
+);
 const CustomerOrdersPage = lazy(() =>
   import("./components/customer/CustomerOrdersPage.jsx")
 );
@@ -31,51 +37,51 @@ const POSPage = lazy(() =>
   import("./components/employee/orders/POSPage.jsx")
 );
 const AdminNotifications = lazy(() =>
-import("./components/admin/notification/AdminNotifications.jsx")
+  import("./components/admin/notification/AdminNotifications.jsx")
 );
 const SubscriptionPlans = lazy(() =>
-import("./components/owner/subscriptionMangement/SubscriptionPlans.jsx")
+  import("./components/owner/subscriptionMangement/SubscriptionPlans.jsx")
 );
 const PaymentHistory = lazy(() =>
-import("./components/admin/subscriptionManagement/PaymentHistory.jsx")
+  import("./components/admin/subscriptionManagement/PaymentHistory.jsx")
 );
 const OwnerDashboard = lazy(() =>
-import("./components/owner/dashboard/OwnerDashboard.jsx")
+  import("./components/owner/dashboard/OwnerDashboard.jsx")
 );
 const AdminSubscriptionsPage = lazy(() =>
-import("./components/admin/subscriptionManagement/AdminSubscriptionsPage.jsx")
+  import("./components/admin/subscriptionManagement/AdminSubscriptionsPage.jsx")
 );
 const AdminDashboard = lazy(() =>
-import("./components/admin/admindashboard/AdminDashboard.jsx")
+  import("./components/admin/admindashboard/AdminDashboard.jsx")
 );
 const ReservationAvailabilitySetup = lazy(() =>
-import("./components/owner/reservationManagement/ReservationAvailabilitySetup.jsx")
+  import("./components/owner/reservationManagement/ReservationAvailabilitySetup.jsx")
 );
 const ReservationManagementPage = lazy(() =>
-import("./components/owner/reservationManagement/ReservationManagementPage.jsx")
+  import("./components/owner/reservationManagement/ReservationManagementPage.jsx")
 );
 const RestaurantSignup = lazy(() =>
-import("./components/signup/RestaurantSignup.jsx")
+  import("./components/signup/RestaurantSignup.jsx")
 );
 const OwnerOrderDetailPage = lazy(() =>
-import("./components/owner/orderManagement/OwnerOrderDetailPage.jsx")
+  import("./components/owner/orderManagement/OwnerOrderDetailPage.jsx")
 );
 const AddNewOrderPage = lazy(() =>
-import("./components/owner/orderManagement/AddNewOrderPage.jsx")
+  import("./components/owner/orderManagement/AddNewOrderPage.jsx")
 );
-const OwnerOrderManagementPage = lazy(()=>
-import("./components/owner/orderManagement/OwnerOrderManagementPage")
+const OwnerOrderManagementPage = lazy(() =>
+  import("./components/owner/orderManagement/OwnerOrderManagementPage")
 );
-const CustomerProfilePage = lazy(() => 
-import("./components/customer/profile/CustomerProfilePage")
+const CustomerProfilePage = lazy(() =>
+  import("./components/customer/profile/CustomerProfilePage")
 );
-const OrderConfirmationPage = lazy(() => 
+const OrderConfirmationPage = lazy(() =>
   import("./components/customer/orderManagement/OrderConfirmationPage")
 );
-const CustomerMenuPage = lazy (() => 
+const CustomerMenuPage = lazy(() =>
   import("./components/customer/restaurant/CustomerMenuPage")
 );
-const UserDetailsPage = lazy(() => 
+const UserDetailsPage = lazy(() =>
   import("./components/admin/userManagement/UserDetailsPage")
 );
 const TableManagementPage = lazy(() =>
@@ -145,25 +151,25 @@ const RestaurantManagementList = lazy(() =>
 const RestaurantDetailsPage = lazy(() =>
   import("./components/admin/restaurantManagement/RestaurantDetailsPage")
 );
-const CategoryManagementList = lazy(() => 
+const CategoryManagementList = lazy(() =>
   import("./components/owner/menuManagement/CategoryMangementList")
 );
-const CategoryDetailPage = lazy(() => 
+const CategoryDetailPage = lazy(() =>
   import("./components/owner/menuManagement/CategoryDetailPage")
 );
-const MenuItemManagementList = lazy(() => 
+const MenuItemManagementList = lazy(() =>
   import("./components/owner/menuManagement/MenuManagementList")
 );
 const MenuItemDetailPage = lazy(() =>
-   import("./components/owner/menuManagement/MenuItemDetailPage")
+  import("./components/owner/menuManagement/MenuItemDetailPage")
 );
-const CustomerManagementPage = lazy(() =>  
+const CustomerManagementPage = lazy(() =>
   import("./components/owner/customerManagement/CustomerManagementPage")
 );
-const CustomerDetailPage = lazy(() => 
+const CustomerDetailPage = lazy(() =>
   import("./components/owner/customerManagement/CustomerDetailPage")
 );
-const ResetPasswordPage = lazy(() => 
+const ResetPasswordPage = lazy(() =>
   import("./components/login/ResetPasswordPage")
 );
 // const OwnerOrderDetailPage
@@ -179,25 +185,26 @@ function App() {
     <>
       {/* <Circle></Circle>  */}
       <Suspense fallback={<CommonLoadingSpinner />} >
-   <ErrorBoundary
-            FallbackComponent={ErrorFallback}
-            onReset={() => {
+        <ErrorBoundary
+          FallbackComponent={ErrorFallback}
+          onReset={() => {
 
-              if (user.role.toLowerCase() === 'owner') {
-                window.location.href = '/owner/employees/list';
-              } else if (user.role.toLowerCase() === 'admin') {
-                window.location.href = '/admin/dashboard';
-              } else if (user.role.toLowerCase() === 'employee') {
-                window.location.href = '/employee/dashboard';
-              }
+            if (user.role.toLowerCase() === 'owner') {
+              window.location.href = '/owner/employees/list';
+            } else if (user.role.toLowerCase() === 'admin') {
+              window.location.href = '/admin/dashboard';
+            } else if (user.role.toLowerCase() === 'employee') {
+              window.location.href = '/employee/dashboard';
+            }
 
-            }}
-          >
-        
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-           <Route path="/signup" element={<RestaurantSignup />} />
-           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          }}
+        >
+
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/signup" element={<RestaurantSignup />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/service-suspended" element={<ServiceSuspendedPage />} />
             {otpPermission ? (
               <Route path="/otpVerification" element={<OtpVerifcationPage />} />
             ) : (
@@ -261,7 +268,7 @@ function App() {
                 />
 
               </Route>
-              
+
             ) : (
               <Route
                 path="/admin/*"
@@ -273,14 +280,18 @@ function App() {
             {user && user.role.toLowerCase() === "owner" ? (
               <Route
                 path="/owner"
-                element={<OwnerLayoutPage />}
+                element={
+                  <RestaurantAccessGuard>
+                    <OwnerLayoutPage />
+                  </RestaurantAccessGuard>
+                }
               >
                 {/* Define owner-specific routes here */}
                 <Route
                   path="dashboard"
                   element={<OwnerDashboard />}
                 /> {/* Default page */}
-                
+
                 <Route
                   path="employees/list"
                   element={<EmployeeManagementList />}
@@ -301,13 +312,13 @@ function App() {
                   path="tables"
                   element={<TableManagementPage />}
                 />
-                <Route 
-                path="category"
-                element={<CategoryManagementList />}
+                <Route
+                  path="category"
+                  element={<CategoryManagementList />}
                 />
-                <Route 
-                path="category/detail/:categoryEncryptedId"
-                element={<CategoryDetailPage />}
+                <Route
+                  path="category/detail/:categoryEncryptedId"
+                  element={<CategoryDetailPage />}
                 />
                 <Route
                   path="menu"
@@ -353,7 +364,7 @@ function App() {
                   path="subscription/plans"
                   element={<SubscriptionPlans />}
                 />
-             
+
               </Route>
             ) : (
               <Route
@@ -383,21 +394,21 @@ function App() {
 
             <Route path="/restaurant/:encryptedId" element={<CustomerLayout />}>
               <Route path="home" element={<RestaurantHomePage />} />
-              <Route path="menu" element={<CustomerMenuPage/>} />
-              <Route path="confirm-order" element={<OrderConfirmationPage /> } />
+              <Route path="menu" element={<CustomerMenuPage />} />
+              <Route path="confirm-order" element={<OrderConfirmationPage />} />
               <Route path="orders" element={<CustomerOrdersPage />} />
               <Route path="orders/:orderId" element={<CustomerOrderDetailPage />} />
 
             </Route>
 
             <Route path="/customer" element={<CustomerLayout />}>
-                <Route path="profile/:encryptedId" element={<CustomerProfilePage />} />
-             </Route>
+              <Route path="profile/:encryptedId" element={<CustomerProfilePage />} />
+            </Route>
             <Route path="/public/login/:encryptedId" element={<CustomerAuthPage />} />
 
-        </Routes>
-        
-         </ErrorBoundary>
+          </Routes>
+
+        </ErrorBoundary>
 
       </Suspense>
     </>

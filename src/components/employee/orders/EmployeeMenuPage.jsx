@@ -105,7 +105,7 @@ const EmployeeMenuPage = () => {
                 <div className="p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-bold text-gray-800">{item.name}</h3>
-                    <span className="font-bold text-indigo-600">${item.price}</span>
+                    <span className="font-bold text-indigo-600">₹{item.price}</span>
                   </div>
                   <p className="text-sm text-gray-500 line-clamp-2 mb-4">{item.description}</p>
                   <span className={`text-xs px-2 py-1 rounded-full ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

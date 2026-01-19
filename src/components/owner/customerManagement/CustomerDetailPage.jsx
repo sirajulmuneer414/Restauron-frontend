@@ -19,6 +19,7 @@ import {
     Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
 // --- Reusable Modals and Components ---
 
@@ -51,6 +52,8 @@ const BlockCustomerModal = ({ isOpen, onClose, customer, onBlockSuccess }) => {
     const [formData, setFormData] = useState({ subject: '', description: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const user = useSelector((state) => state.userSlice?.user);
+    const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
     useEffect(() => {
         if (isOpen) {
@@ -65,6 +68,12 @@ const BlockCustomerModal = ({ isOpen, onClose, customer, onBlockSuccess }) => {
     };
 
     const handleSubmit = async (e) => {
+
+        if(isReadOnly) {
+            toast.error("Cannot block customer in Read-Only mode.");    
+            return; // Prevent action in read-only mode
+        }
+
         e.preventDefault();
         if (!formData.subject.trim() || !formData.description.trim()) {
             setError("Both subject and description are required.");
@@ -118,7 +127,7 @@ const BlockCustomerModal = ({ isOpen, onClose, customer, onBlockSuccess }) => {
                     {error && <p className="text-red-400 text-sm p-3 bg-red-500/10 rounded-lg">{error}</p>}
                     <div className="flex justify-end gap-3 pt-4">
                         <Button type="button" onClick={onClose} disabled={isLoading} className="bg-transparent border border-gray-600 hover:bg-gray-700">Cancel</Button>
-                        <Button type="submit" disabled={isLoading || !formData.subject.trim() || !formData.description.trim()} className="bg-red-600 hover:bg-red-700 text-white font-semibold">
+                        <Button type="submit" disabled={isReadOnly || isLoading || !formData.subject.trim() || !formData.description.trim()} className="bg-red-600 hover:bg-red-700 text-white font-semibold">
                             {isLoading ? 'Blocking...' : 'Block Customer'}
                         </Button>
                     </div>

@@ -6,7 +6,7 @@ import { Search, SlidersHorizontal, List } from 'lucide-react';
 
 const RestaurantManagementList = () => {
     const navigate = useNavigate();
-    
+
     // State declarations
     const [restaurantList, setRestaurantList] = useState([]);
     const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ const RestaurantManagementList = () => {
     const [filter, setFilter] = useState('ALL');
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
-    const {axiosAdminInstance} = useAxios();
+    const { axiosAdminInstance } = useAxios();
 
     // Debounce search input
     useEffect(() => {
@@ -71,6 +71,34 @@ const RestaurantManagementList = () => {
         navigate(`/admin/restaurants/details/${restaurantId}`);
     };
 
+    const getStatusBadgeStyle = (status) => {
+        switch (status) {
+            case 'ACTIVE':
+                return 'bg-green-600/20 text-green-300 border-green-700/50';
+            case 'NONACTIVE':
+                return 'bg-red-600/20 text-red-300 border-red-700/50';
+            case 'PENDING':
+                return 'bg-amber-500/20 text-amber-300 border-amber-600/40';
+            default:
+                return 'bg-gray-600/20 text-gray-300 border-gray-700/50';
+        }
+    };
+
+    const getAccessLevelBadgeStyle = (level) => {
+        switch (level) {
+            case 'FULL':
+                return 'bg-green-600/20 text-green-300 border-green-700/50';
+            case 'PARTIAL':
+                return 'bg-amber-500/20 text-amber-300 border-amber-600/40';
+            case 'READ_ONLY':
+                return 'bg-orange-600/20 text-orange-300 border-orange-700/40';
+            case 'BLOCKED':
+                return 'bg-red-600/20 text-red-300 border-red-700/50';
+            default:
+                return 'bg-gray-600/20 text-gray-300 border-gray-700/50';
+        }
+    };
+
     const handlePageSizeChange = (e) => {
         setSize(Number(e.target.value));
         setPage(0);
@@ -109,7 +137,7 @@ const RestaurantManagementList = () => {
                 <h1 className="text-3xl font-bold">Restaurant Management</h1>
                 <p className="text-gray-400 mt-1">Manage and review all registered restaurants.</p>
             </div>
-            
+
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                 <div className="relative w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
@@ -150,8 +178,8 @@ const RestaurantManagementList = () => {
                     </div>
                 </div>
             </div>
-            
-            <div className="overflow-hidden rounded-xl border border-gray-800 bg-gradient-to-b from-black/70 to-black/60">
+
+            <div className="overflow-hidden rounded-xl border border-gray-800 bg-linear-to-b from-black/70 to-black/60">
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-sm">
                         <thead>
@@ -160,9 +188,11 @@ const RestaurantManagementList = () => {
                                 <th className="py-3.5 px-4 text-left font-semibold border-b border-gray-800">Owner</th>
                                 <th className="py-3.5 px-4 text-left font-semibold border-b border-gray-800">Contact Email</th>
                                 <th className="py-3.5 px-4 text-left font-semibold border-b border-gray-800">Status</th>
+                                <th className="py-3.5 px-4 text-left font-semibold border-b border-gray-800">Access Level</th>
                                 <th className="py-3.5 px-4 text-center font-semibold border-b border-gray-800">Action</th>
                             </tr>
                         </thead>
+
                         <tbody className="divide-y divide-gray-800">
                             {isLoading ? (
                                 Array.from({ length: size }).map((_, i) => (
@@ -171,6 +201,7 @@ const RestaurantManagementList = () => {
                                         <td className="p-4"><div className="h-4 bg-gray-700 rounded w-1/2"></div></td>
                                         <td className="p-4"><div className="h-4 bg-gray-700 rounded w-full"></div></td>
                                         <td className="p-4"><div className="h-6 bg-gray-700 rounded-full w-24"></div></td>
+                                        <td className="p-4"><div className="h-4 bg-gray-700 rounded w-1/3"></div></td>
                                         <td className="p-4 flex justify-center"><div className="h-8 bg-gray-700 rounded w-28"></div></td>
                                     </tr>
                                 ))
@@ -180,16 +211,21 @@ const RestaurantManagementList = () => {
                                         <td className="py-3 px-4 font-medium">{restaurant.name}</td>
                                         <td className="py-3 px-4 text-gray-300">{restaurant.ownerName}</td>
                                         <td className="py-3 px-4 text-gray-300">{restaurant.email}</td>
+
+                                        {/* Status Column */}
                                         <td className="py-3 px-4">
-                                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
-                                                restaurant.status === 'ACTIVE' ? 'bg-green-600/20 text-green-300 border-green-700/50' :
-                                                restaurant.status === 'NONACTIVE' ? 'bg-red-600/20 text-red-300 border-red-700/50' :
-                                                restaurant.status === 'PENDING' ? 'bg-amber-500/20 text-amber-300 border-amber-600/40' :
-                                                'bg-gray-600/20 text-gray-300 border-gray-700/50'
-                                            }`}>
+                                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeStyle(restaurant.status)}`}>
                                                 {restaurant.status}
                                             </span>
                                         </td>
+
+                                        {/* Access Level Column */}
+                                        <td className="py-3 px-4">
+                                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${getAccessLevelBadgeStyle(restaurant.accessLevel)}`}>
+                                                {restaurant.accessLevel || 'N/A'}
+                                            </span>
+                                        </td>
+
                                         <td className="py-3 px-4 text-center">
                                             <Button onClick={() => handleViewDetails(restaurant.encryptedId)} className="bg-amber-500 text-black font-semibold py-1.5 px-4 rounded-md text-xs">
                                                 View Details
@@ -199,15 +235,17 @@ const RestaurantManagementList = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="text-center p-10 text-gray-400">
+                                    {/* Note: Updated colSpan to 6 because you have 6 columns now */}
+                                    <td colSpan="6" className="text-center p-10 text-gray-400">
                                         {error || 'No restaurants found.'}
                                     </td>
                                 </tr>
                             )}
                         </tbody>
+
                     </table>
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row items-center justify-between gap-3 border-t border-gray-800 px-4 py-3 bg-black/60">
                     <div className="text-xs text-gray-400">
                         Page {page + 1} of {Math.max(totalPages, 1)} ({totalElements} total results)

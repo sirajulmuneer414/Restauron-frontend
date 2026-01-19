@@ -30,7 +30,9 @@ const initialState = {
         email: "",
         userId: "",
         specialId: "",
-        status: "ACTIVE", // This will be updated by the thunk
+        status: "ACTIVE",
+        restaurantName: "",
+        restaurantAccessLevel: ""
     },
     isAuthenticated: false,
     // Add a status for the fetch operation
@@ -47,6 +49,8 @@ export const userSlice = createSlice({
             state.user.email = action.payload.email;
             state.user.userId = action.payload.userId;
             state.user.status = action.payload.status; // Initial status from login
+            state.user.restaurantAccessLevel = action.payload.restaurantAccessLevel;
+            state.user.restaurantName = action.payload.restaurantName;
             state.isAuthenticated = true;
         },
         resetUserDetails: (state) => {

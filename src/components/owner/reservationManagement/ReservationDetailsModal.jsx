@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '../../ui/button';
 import { useAxios } from '../../../axios/instances/axiosInstances';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 const statusColorMap = {
   CONFIRMED: "text-green-400 border-green-600",
@@ -20,13 +22,23 @@ export default function ReservationDetailsModal({ reservation, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { axiosOwnerInstance } = useAxios();
+  const user = useSelector((state) => state.userSlice.user);
+  const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
   // Only allow status change and remark edit
   const handleStatusChange = (e) => {
+    if (isReadOnly) {
+      toast.error("Cannot change status in Read-Only mode.");
+      return;
+    }
     setCurrentStatus(e.target.value);
   };
 
   const handleUpdate = async (e) => {
+    if (isReadOnly) {
+      toast.error("Cannot update reservation in Read-Only mode.");
+      return;
+    }
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -56,6 +68,10 @@ export default function ReservationDetailsModal({ reservation, onClose }) {
   };
 
   const handleDelete = async () => {
+    if (isReadOnly) {
+      toast.error("Cannot delete reservation in Read-Only mode.");
+      return;
+    }
     if (!window.confirm("Are you sure you want to delete this reservation?")) return;
     setLoading(true);
     try {
