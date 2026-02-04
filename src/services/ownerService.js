@@ -45,6 +45,7 @@ export const useOwnerService = () => {
 
     getSalesReport: async () => {
       const response = await axiosOwnerInstance.get("/dashboard/stats/report");
+      console.log("Sales Report Data:", response.data);
       return response.data;
     },
     // 2. Create Razorpay Order
