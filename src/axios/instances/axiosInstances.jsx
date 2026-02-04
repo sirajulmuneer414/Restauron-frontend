@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { env } from 'process';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL 
-    ? import.meta.env.VITE_API_BASE_URL: "http://localhost:8081/api")
+    ? import.meta.env.VITE_API_BASE_URL + '/api': "http://localhost:8081/api")
 // --- Interceptor Logic ---
 const createAuthResponseInterceptor = (navigate) => async (error) => {
     const originalRequest = error.config;
