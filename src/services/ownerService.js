@@ -11,7 +11,9 @@ export const useOwnerService = () => {
       return response.data;
     },
     getSubscriptionStatus: async () => {
-      const response = await axiosOwnerInstance.get("dashboard/subscription/status");
+      const response = await axiosOwnerInstance.get(
+        "dashboard/subscription/status",
+      );
       return response.data;
     },
     getRecentOrders: async () => {
@@ -19,26 +21,36 @@ export const useOwnerService = () => {
       return response.data;
     },
     getEmployeeCount: async () => {
-      const response = await axiosOwnerInstance.get("dashboard/stats/employees");
+      const response = await axiosOwnerInstance.get(
+        "dashboard/stats/employees",
+      );
       return response.data;
     },
     getTopItems: async () => {
-      const response = await axiosOwnerInstance.get("dashboard/stats/top-items");
+      const response = await axiosOwnerInstance.get(
+        "dashboard/stats/top-items",
+      );
       return response.data;
     },
     getAllPackages: async () => {
       const response = await axiosOwnerInstance.get("/subscription/packages");
       return response.data;
     },
-   getRestaurantCustomerLink: async () => {
-  const response = await axiosOwnerInstance.get('/dashboard/restaurant/customer-link');
-  return response.data;
-}, 
+    getRestaurantCustomerLink: async () => {
+      const response = await axiosOwnerInstance.get(
+        "/dashboard/restaurant/customer-link",
+      );
+      return response.data;
+    },
 
+    getSalesReport: async () => {
+      const response = await axiosOwnerInstance.get("/dashboard/stats/report");
+      return response.data;
+    },
     // 2. Create Razorpay Order
     createPaymentOrder: async (packageId) => {
       const response = await axiosOwnerInstance.post(
-        `/payments/create-order/${packageId}`
+        `/payments/create-order/${packageId}`,
       );
       return response.data;
     },
@@ -47,15 +59,13 @@ export const useOwnerService = () => {
     verifyPayment: async (paymentData) => {
       const response = await axiosOwnerInstance.post(
         "/payments/verify",
-        paymentData
+        paymentData,
       );
       return response.data;
     },
     // 4. Get Owner Contact Number
     getOwnerContactNumber: async () => {
-      const response = await axiosOwnerInstance.get(
-        `/contact-info`
-      );
+      const response = await axiosOwnerInstance.get(`/contact-info`);
       return response.data;
     },
   };
