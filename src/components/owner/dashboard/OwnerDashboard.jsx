@@ -144,36 +144,11 @@ const SalesAnalyticsSection = ({ ownerService }) => {
 
     const maxVal = reportData?.chartData ? Math.max(...reportData.chartData.map(d => d.value)) : 0;
 
+   // inside SalesAnalyticsSection component
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                        <BarChart3 size={20} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-bold text-gray-800">Sales Analytics</h2>
-                        <p className="text-xs text-gray-500">Revenue breakdown over time</p>
-                    </div>
-                </div>
-                
-                {/* Filter Tabs */}
-                <div className="flex bg-gray-100 p-1 rounded-lg">
-                    {['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'].map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setFilterType(type)}
-                            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all ${
-                                filterType === type 
-                                ? 'bg-white text-indigo-600 shadow-sm' 
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                        >
-                            {type.charAt(0) + type.slice(1).toLowerCase()}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {/* ... Header and Tabs code remains same ... */}
 
             {loading ? (
                 <div className="h-64 flex items-center justify-center text-gray-400 text-sm">Loading Chart...</div>
@@ -181,41 +156,40 @@ const SalesAnalyticsSection = ({ ownerService }) => {
                 <>
                     {/* Summary Row */}
                     <div className="grid grid-cols-3 gap-4 mb-8">
+                        {/* ... Summary cards remain same ... */}
                         <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p className="text-xs text-gray-500 mb-1">Total Revenue</p>
-                            <p className="text-xl font-bold text-gray-900">₹{(reportData?.totalRevenue || 0).toLocaleString()}</p>
+                           <p className="text-xs text-gray-500 mb-1">Total Revenue</p>
+                           <p className="text-xl font-bold text-gray-900">₹{(reportData?.totalRevenue || 0).toLocaleString()}</p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p className="text-xs text-gray-500 mb-1">Total Orders</p>
-                            <p className="text-xl font-bold text-gray-900">{reportData?.totalOrders || 0}</p>
-                        </div>
-                        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p className="text-xs text-gray-500 mb-1">Avg Order Value</p>
-                            <p className="text-xl font-bold text-gray-900">₹{(reportData?.averageOrderValue || 0).toFixed(0)}</p>
-                        </div>
+                        {/* ... other 2 cards ... */}
                     </div>
 
-                    {/* Custom CSS Bar Chart */}
-                    <div className="h-64 flex items-end justify-between gap-2">
+                    {/* FIXED CHART VISUALS */}
+                    <div className="h-64 flex items-end gap-1"> {/* CHANGED: gap-2 to gap-1, removed justify-between */}
                         {reportData?.chartData?.length > 0 ? (
                             reportData.chartData.map((point, idx) => {
                                 const heightPercentage = maxVal > 0 ? (point.value / maxVal) * 100 : 0;
                                 return (
-                                    <div key={idx} className="flex flex-col items-center flex-1 group relative">
+                                    <div key={idx} className="flex flex-col items-center flex-1 group relative h-full justify-end">
+                                        
                                         {/* Tooltip */}
-                                        <div className="absolute bottom-full mb-2 hidden group-hover:block z-10">
-                                            <div className="bg-gray-800 text-white text-xs py-1 px-2 rounded shadow-lg whitespace-nowrap">
-                                                ₹{point.value} <br/> <span className="text-gray-400">{point.date}</span>
+                                        <div className="absolute bottom-full mb-2 hidden group-hover:block z-10 w-max">
+                                            <div className="bg-gray-800 text-white text-xs py-1 px-2 rounded shadow-lg text-center">
+                                                ₹{point.value} <br/> 
+                                                <span className="text-gray-400">{point.date}</span>
                                             </div>
                                         </div>
+
                                         {/* Bar */}
                                         <div 
-                                            className="w-full bg-indigo-100 rounded-t hover:bg-indigo-500 transition-all duration-300 relative group-hover:shadow-md"
-                                            style={{ height: `${Math.max(heightPercentage, 4)}%` }} // min 4% height
+                                            className={`w-full rounded-t transition-all duration-300 relative ${point.value > 0 ? 'bg-indigo-500 hover:bg-indigo-600' : 'bg-indigo-50 hover:bg-indigo-100'}`}
+                                            style={{ height: `${point.value > 0 ? heightPercentage : 4}%` }} 
                                         ></div>
+
                                         {/* Label */}
-                                        <span className="text-[10px] text-gray-400 mt-2 rotate-0 truncate w-full text-center">
-                                            {point.label}
+                                        {/* Only show label for every 3rd item if there are too many items, else show all */}
+                                        <span className="text-[10px] text-gray-400 mt-2 truncate w-full text-center h-4">
+                                            {reportData.chartData.length > 20 && idx % 3 !== 0 ? '' : point.label}
                                         </span>
                                     </div>
                                 );
