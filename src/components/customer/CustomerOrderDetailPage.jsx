@@ -28,7 +28,7 @@ const CustomerOrderDetailPage = () => {
     // Subscribe to order updates
     const subscription = subscribeToOrder(orderId, (updatedOrder) => {
       console.log('Order status updated via WebSocket:', updatedOrder);
-      
+
       // Update the order status in state
       setOrder((prev) => {
         if (!prev) return prev;
@@ -97,7 +97,7 @@ const CustomerOrderDetailPage = () => {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent" />
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent" />
           <p className="text-zinc-400 mt-4">Loading order details...</p>
         </div>
       </div>
@@ -111,7 +111,7 @@ const CustomerOrderDetailPage = () => {
           <p className="text-zinc-400">Order not found</p>
           <button
             onClick={() => navigate('/customer/orders')}
-            className="mt-4 px-4 py-2 bg-amber-500 text-black rounded-lg font-semibold hover:bg-amber-400 transition"
+            className="mt-4 px-4 py-2 bg-yellow-500 text-black rounded-lg font-semibold hover:bg-yellow-400 transition"
           >
             Back to Orders
           </button>
@@ -143,7 +143,7 @@ const CustomerOrderDetailPage = () => {
         )}
 
         {/* Order Info Card */}
-        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/20 rounded-2xl p-6 mb-6">
+        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-yellow-500/20 rounded-2xl p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h1 className="text-2xl font-black text-white mb-2">
@@ -154,7 +154,7 @@ const CustomerOrderDetailPage = () => {
             <StatusBadge status={order.status} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-500/10">
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-yellow-500/10">
             <div>
               <p className="text-xs text-zinc-500 mb-1">Order Type</p>
               <p className="text-white font-semibold">{order.orderType}</p>
@@ -179,13 +179,13 @@ const CustomerOrderDetailPage = () => {
         </div>
 
         {/* Status Timeline */}
-        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/20 rounded-2xl p-6 mb-6">
+        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-yellow-500/20 rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-bold text-white mb-6">Order Status</h2>
           <div className="relative">
             {/* Progress Line */}
             <div className="absolute top-5 left-0 right-0 h-0.5 bg-zinc-800">
               <div
-                className="h-full bg-linear-to-r from-amber-500 to-yellow-500 transition-all duration-500"
+                className="h-full bg-linear-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
                 style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 100}%` }}
               />
             </div>
@@ -200,18 +200,16 @@ const CustomerOrderDetailPage = () => {
                 return (
                   <div key={step.status} className="flex flex-col items-center">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                        isCompleted
-                          ? 'bg-amber-500 border-amber-500 text-black'
+                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted
+                          ? 'bg-yellow-500 border-yellow-500 text-black'
                           : 'bg-zinc-900 border-zinc-700 text-zinc-500'
-                      } ${isCurrent ? 'ring-4 ring-amber-500/20 scale-110' : ''}`}
+                        } ${isCurrent ? 'ring-4 ring-yellow-500/20 scale-110' : ''}`}
                     >
                       <Icon size={18} />
                     </div>
                     <p
-                      className={`mt-2 text-xs font-semibold transition-colors ${
-                        isCompleted ? 'text-white' : 'text-zinc-500'
-                      }`}
+                      className={`mt-2 text-xs font-semibold transition-colors ${isCompleted ? 'text-white' : 'text-zinc-500'
+                        }`}
                     >
                       {step.label}
                     </p>
@@ -223,13 +221,13 @@ const CustomerOrderDetailPage = () => {
         </div>
 
         {/* Order Items */}
-        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/20 rounded-2xl p-6">
+        <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-yellow-500/20 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-white mb-4">Order Items</h2>
           <div className="space-y-3">
             {order.items.map((item) => (
               <div
                 key={item.encryptedMenuItemId}
-                className="flex items-center justify-between p-4 bg-black/40 border border-amber-500/10 rounded-xl"
+                className="flex items-center justify-between p-4 bg-black/40 border border-yellow-500/10 rounded-xl"
               >
                 <div className="flex-1">
                   <h3 className="text-white font-semibold">{item.menuItemName}</h3>
@@ -244,8 +242,8 @@ const CustomerOrderDetailPage = () => {
                   {order.status === 'COMPLETED' && (
                     <button
                       onClick={() => setRatingModal({ isOpen: true, item })}
-                      className="mt-2 flex items-center gap-1 px-3 py-1 rounded-lg bg-amber-500/10 
-                               border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 
+                      className="mt-2 flex items-center gap-1 px-3 py-1 rounded-lg bg-yellow-500/10 
+                               border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20 
                                transition-colors text-xs font-semibold"
                     >
                       <Star size={14} />

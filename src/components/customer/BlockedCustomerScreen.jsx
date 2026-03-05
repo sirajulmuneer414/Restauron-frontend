@@ -8,7 +8,7 @@ import { useAxios } from '../../axios/instances/axiosInstances';
 
 const BlockedCustomerScreen = () => {
     const user = useSelector(state => state.userSlice.user);
-    
+
     const [blockInfo, setBlockInfo] = useState(null);
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,7 +133,7 @@ const BlockedCustomerScreen = () => {
                             </div>
                             <h3 className="text-2xl font-bold text-yellow-300">Request Under Review</h3>
                             <p className="text-yellow-200 max-w-2xl mx-auto">
-                                Your unblock request has been submitted and is being reviewed by the restaurant management. 
+                                Your unblock request has been submitted and is being reviewed by the restaurant management.
                                 You'll be notified once a decision is made.
                             </p>
                             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mt-6">
@@ -151,7 +151,7 @@ const BlockedCustomerScreen = () => {
                             <div className="text-center space-y-4">
                                 <h3 className="text-2xl font-bold text-white">Request Account Restoration</h3>
                                 <p className="text-gray-400 max-w-2xl mx-auto">
-                                    If you believe this restriction was made in error or you'd like to appeal, 
+                                    If you believe this restriction was made in error or you'd like to appeal,
                                     please explain your situation below.
                                 </p>
                             </div>
@@ -174,11 +174,11 @@ const BlockedCustomerScreen = () => {
                                         Maximum 500 characters. Be clear and respectful in your explanation.
                                     </p>
                                 </div>
-                                
+
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting || !message.trim()}
-                                    className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-black font-semibold py-4 px-6 rounded-lg flex items-center justify-center gap-2 text-lg"
+                                    className="w-full bg-gradient-to-r from-yellow-500 to-yellow-500 hover:from-yellow-600 hover:to-yellow-600 text-black font-semibold py-4 px-6 rounded-lg flex items-center justify-center gap-2 text-lg"
                                 >
                                     {isSubmitting ? (
                                         <>Submitting Request...</>

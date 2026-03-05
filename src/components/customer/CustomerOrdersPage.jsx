@@ -12,7 +12,7 @@ const CustomerOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const customerService = useCustomerService();
-  const {encryptedId} = useParams();
+  const { encryptedId } = useParams();
 
   // ✨ Check authentication status
   const isAuthenticated = useSelector((state) => state.userSlice?.isAuthenticated);
@@ -45,10 +45,10 @@ const CustomerOrdersPage = () => {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="max-w-md w-full">
-          <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/20 rounded-2xl p-8 text-center">
+          <div className="bg-linear-to-br from-zinc-900/80 to-black/60 border border-yellow-500/20 rounded-2xl p-8 text-center">
             {/* Lock Icon */}
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 border-2 border-amber-500/30 mb-6">
-              <Lock className="text-amber-400" size={40} />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-yellow-500/10 border-2 border-yellow-500/30 mb-6">
+              <Lock className="text-yellow-400" size={40} />
             </div>
 
             {/* Heading */}
@@ -63,9 +63,9 @@ const CustomerOrdersPage = () => {
             <Link
               to={`/public/login/${encryptedId}`}
               className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 
-                       bg-linear-to-r from-amber-500 to-yellow-600 text-black font-bold 
-                       rounded-xl hover:from-amber-400 hover:to-yellow-500 transition-all 
-                       shadow-lg hover:shadow-amber-500/25"
+                       bg-linear-to-r from-yellow-500 to-yellow-600 text-black font-bold 
+                       rounded-xl hover:from-yellow-400 hover:to-yellow-500 transition-all 
+                       shadow-lg hover:shadow-yellow-500/25"
             >
               <LogIn size={20} />
               Login to Continue
@@ -76,7 +76,7 @@ const CustomerOrdersPage = () => {
               Don't have an account?{' '}
               <Link
                 to={`/public/login/${encryptedId}`}
-                className="text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+                className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
               >
                 Sign up here
               </Link>
@@ -90,8 +90,8 @@ const CustomerOrdersPage = () => {
   const OrderCard = ({ order }) => (
     <div
       onClick={() => navigate(`/restaurant/${encryptedId}/orders/${order.encryptedOrderId}`)}
-      className="group bg-linear-to-br from-zinc-900/80 to-black/60 border border-amber-500/10 
-                 rounded-2xl p-6 hover:border-amber-500/30 transition-all cursor-pointer"
+      className="group bg-linear-to-br from-zinc-900/80 to-black/60 border border-yellow-500/10 
+                 rounded-2xl p-6 hover:border-yellow-500/30 transition-all cursor-pointer"
     >
       <div className="flex items-start justify-between mb-4">
         <div>
@@ -102,12 +102,12 @@ const CustomerOrdersPage = () => {
           <p className="text-zinc-400 text-sm">{order.restaurantName}</p>
         </div>
         <ArrowRight
-          className="text-zinc-600 group-hover:text-amber-400 group-hover:translate-x-1 transition-all"
+          className="text-zinc-600 group-hover:text-yellow-400 group-hover:translate-x-1 transition-all"
           size={20}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-amber-500/10">
+      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-yellow-500/10">
         <div>
           <p className="text-xs text-zinc-500 mb-1">Total Amount</p>
           <p className="text-white font-semibold">₹{order.totalAmount.toFixed(2)}</p>
@@ -138,25 +138,23 @@ const CustomerOrdersPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-zinc-900/50 p-1 rounded-xl border border-amber-500/10">
+        <div className="flex gap-2 mb-6 bg-zinc-900/50 p-1 rounded-xl border border-yellow-500/10">
           <button
             onClick={() => setActiveTab('ACTIVE')}
-            className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'ACTIVE'
-                ? 'bg-amber-500 text-black'
+            className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'ACTIVE'
+                ? 'bg-yellow-500 text-black'
                 : 'text-zinc-400 hover:text-white'
-            }`}
+              }`}
           >
             <Clock size={18} />
             Active Orders
           </button>
           <button
             onClick={() => setActiveTab('COMPLETED')}
-            className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-              activeTab === 'COMPLETED'
-                ? 'bg-amber-500 text-black'
+            className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${activeTab === 'COMPLETED'
+                ? 'bg-yellow-500 text-black'
                 : 'text-zinc-400 hover:text-white'
-            }`}
+              }`}
           >
             <Package size={18} />
             Order History
@@ -166,13 +164,13 @@ const CustomerOrdersPage = () => {
         {/* Orders List */}
         {loading ? (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent" />
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent" />
             <p className="text-zinc-400 mt-4">Loading orders...</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 mb-4">
-              <ShoppingBag className="text-amber-400" size={32} />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/10 border border-yellow-500/20 mb-4">
+              <ShoppingBag className="text-yellow-400" size={32} />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No orders found</h3>
             <p className="text-zinc-400">

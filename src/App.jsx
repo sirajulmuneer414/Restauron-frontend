@@ -172,6 +172,9 @@ const CustomerDetailPage = lazy(() =>
 const ResetPasswordPage = lazy(() =>
   import("./components/login/ResetPasswordPage")
 );
+const TableOrderPage = lazy(() =>
+  import("./pages/customer/TableOrderPage")
+);
 // const OwnerOrderDetailPage
 // const
 
@@ -375,7 +378,14 @@ function App() {
             }
 
             {user && user.role.toLowerCase() === "employee" ? (
-              <Route path="/employee" element={<EmployeeLayoutPage />}>
+              <Route
+                path="/employee"
+                element={
+                  <RestaurantAccessGuard>
+                    <EmployeeLayoutPage />
+                  </RestaurantAccessGuard>
+                }
+              >
                 <Route path="dashboard" element={<EmployeeDashboard />} /> {/* Default page */}
                 <Route path="pos" element={<POSPage />} />
                 <Route path="kitchen" element={<KitchenDisplay />} />
@@ -404,6 +414,10 @@ function App() {
             <Route path="/customer" element={<CustomerLayout />}>
               <Route path="profile/:encryptedId" element={<CustomerProfilePage />} />
             </Route>
+
+            {/* Public Table-Side Ordering (No Auth Required) */}
+            <Route path="/restaurant/:restaurantId/table/:tableId" element={<TableOrderPage />} />
+
             <Route path="/public/login/:encryptedId" element={<CustomerAuthPage />} />
 
           </Routes>
