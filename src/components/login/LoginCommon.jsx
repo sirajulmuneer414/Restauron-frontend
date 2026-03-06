@@ -38,7 +38,7 @@ function LoginCommon() {
   // ── Demo accounts (credentials never rendered in UI) ──
   const DEMO_ACCOUNTS = {
     owner: { email: 's30050852@gmail.com', password: 'siraj@12345' },
-    employee: { email: 'employee@restauron.com', password: 'employee123' }, // placeholder — update later
+    employee: { email: 'demo@demo.com', password: 'sw9cyevo' }, // placeholder — update later
     admin: { email: 'Admin@restauron.com', password: 'adminOfRestauron123' },
   };
 
@@ -171,7 +171,7 @@ function LoginCommon() {
             , your<br />way.
           </h2>
           <p className="text-gray-400 text-lg max-w-sm leading-relaxed">
-            Orders, menus, staff, and subscriptions — all in one place, built for modern restaurants.
+            Orders, menus, staff, and subscriptions : all in one place, built for modern restaurants.
           </p>
 
           {/* Trust indicators */}
