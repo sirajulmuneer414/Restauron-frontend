@@ -293,10 +293,20 @@ function CategoryDetailPage() {
                     <p className="text-gray-400 mt-1 max-w-2xl">{category.description || 'No description available.'}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button onClick={() => setIsEditModalOpen(true)} className="bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 hover:bg-yellow-500 hover:text-black">
+                    <Button
+                        onClick={() => setIsEditModalOpen(true)}
+                        disabled={isReadOnly}
+                        className="bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 hover:bg-yellow-500 hover:text-black disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={isReadOnly ? 'Read-Only mode — renew subscription to edit' : undefined}
+                    >
                         <Edit size={16} /> Edit
                     </Button>
-                    <Button onClick={() => setIsDeleteModalOpen(true)} className="bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-600 hover:text-white">
+                    <Button
+                        onClick={() => setIsDeleteModalOpen(true)}
+                        disabled={isReadOnly}
+                        className="bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-600 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={isReadOnly ? 'Read-Only mode — renew subscription to delete' : undefined}
+                    >
                         <Trash size={16} /> Delete
                     </Button>
                 </div>

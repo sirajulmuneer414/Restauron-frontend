@@ -12,6 +12,9 @@ const RestaurantAccessGuard = lazy(() =>
 const ServiceSuspendedPage = lazy(() =>
   import("./pages/common/ServiceSuspendedPage.jsx")
 );
+const EmployeeSuspendedPage = lazy(() =>
+  import("./pages/common/EmployeeSuspendedPage.jsx")
+);
 const CustomerOrdersPage = lazy(() =>
   import("./components/customer/CustomerOrdersPage.jsx")
 );
@@ -35,6 +38,9 @@ const KitchenDisplay = lazy(() =>
 );
 const POSPage = lazy(() =>
   import("./components/employee/orders/POSPage.jsx")
+);
+const EmployeeOrderListPage = lazy(() =>
+  import("./components/employee/orders/EmployeeOrderListPage.jsx")
 );
 const AdminNotifications = lazy(() =>
   import("./components/admin/notification/AdminNotifications.jsx")
@@ -175,6 +181,15 @@ const ResetPasswordPage = lazy(() =>
 const TableOrderPage = lazy(() =>
   import("./pages/customer/TableOrderPage")
 );
+const EmployeeTableListPage = lazy(() =>
+  import("./components/employee/tables/EmployeeTableListPage")
+);
+const EmployeeTableDetailPage = lazy(() =>
+  import("./components/employee/tables/EmployeeTableDetailPage")
+);
+const EmployeeOrderDetailPage = lazy(() =>
+  import("./components/employee/orders/EmployeeOrderDetailPage")
+);
 // const OwnerOrderDetailPage
 // const
 
@@ -208,6 +223,7 @@ function App() {
             <Route path="/signup" element={<RestaurantSignup />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/service-suspended" element={<ServiceSuspendedPage />} />
+            <Route path="/employee-suspended" element={<EmployeeSuspendedPage />} />
             {otpPermission ? (
               <Route path="/otpVerification" element={<OtpVerifcationPage />} />
             ) : (
@@ -392,6 +408,10 @@ function App() {
                 <Route path="menu" element={<EmployeeMenuPage />} />
                 <Route path="profile/:specialId" element={<EmployeeProfilePage />} />{/* Profile page */}
                 <Route path="change-password" element={<EmployeeChangePasswordPage />} />
+                <Route path="tables" element={<EmployeeTableListPage />} />
+                <Route path="tables/:tableId" element={<EmployeeTableDetailPage />} />
+                <Route path="orders" element={<EmployeeOrderListPage />} />
+                <Route path="orders/:orderId" element={<EmployeeOrderDetailPage />} />
 
                 {/* Add other employee routes here */}
               </Route>

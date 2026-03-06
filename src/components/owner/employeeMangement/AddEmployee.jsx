@@ -12,14 +12,14 @@ import toast from 'react-hot-toast';
 // --- Validation Schema ---
 // Now includes validation for the aadhaarImage file
 const AddEmployeeSchema = Yup.object().shape({
-  name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Name is required'),
-  personalEmail: Yup.string().email('Invalid email').required('Personal email is required'),
-  phone: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Phone is required'),
-  aadhaarNo: Yup.string().matches(/^[0-9]{12}$/, 'Must be 12 digits').required('Aadhaar number is required'),
-  aadhaarImage: Yup.mixed()
-    .required('Aadhaar photo is required')
-    .test('fileSize', 'File is too large (max 2MB)', (value) => value && value.size <= 2 * 1024 * 1024)
-    .test('fileType', 'Unsupported file format', (value) => value && ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type)),
+    name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!').required('Name is required'),
+    personalEmail: Yup.string().email('Invalid email').required('Personal email is required'),
+    phone: Yup.string().matches(/^[0-9]{10}$/, 'Must be 10 digits').required('Phone is required'),
+    aadhaarNo: Yup.string().matches(/^[0-9]{12}$/, 'Must be 12 digits').required('Aadhaar number is required'),
+    aadhaarImage: Yup.mixed()
+        .required('Aadhaar photo is required')
+        .test('fileSize', 'File is too large (max 2MB)', (value) => value && value.size <= 2 * 1024 * 1024)
+        .test('fileType', 'Unsupported file format', (value) => value && ['image/jpeg', 'image/png', 'image/jpg'].includes(value.type)),
 });
 
 // --- Helper Component for Credential Generation ---
@@ -45,7 +45,7 @@ const CredentialGenerator = ({ restaurantName }) => {
 const AddEmployee = () => {
     const navigate = useNavigate();
     const [imagePreview, setImagePreview] = useState(null);
-    const restaurantName = "Chillies"; // Replace with your actual data source
+    const restaurantName = useSelector((state) => state.ownerDetailsSlice?.restaurantName); // Replace with your actual data source
     const user = useSelector((state) => state.userSlice?.user);
     const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
@@ -67,8 +67,8 @@ const AddEmployee = () => {
             formData.append('aadhaarImage', values.aadhaarImage);
             formData.append('companyEmail', values.companyEmail);
             formData.append('generatedPassword', values.generatedPassword);
-        
-        
+
+
 
             const response = await axiosOwnerInstance.post('/employees/add', formData);
 
@@ -118,7 +118,7 @@ const AddEmployee = () => {
                     {({ isSubmitting, errors, setFieldValue, values }) => (
                         <Form className="space-y-6">
                             <CredentialGenerator restaurantName={restaurantName} />
-                            
+
                             <FormInput icon={User} name="name" type="text" placeholder="Full Name" />
                             <FormInput icon={Mail} name="personalEmail" type="email" placeholder="Employee's Personal Email" />
                             <FormInput icon={Phone} name="phone" type="tel" placeholder="10-digit Phone Number" />

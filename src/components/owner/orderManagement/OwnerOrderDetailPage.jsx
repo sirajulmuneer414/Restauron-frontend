@@ -2,14 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAxios } from '../../../axios/instances/axiosInstances';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Trash2, Edit, Printer,Plus } from 'lucide-react';
+import { ArrowLeft, Trash2, Printer, Plus } from 'lucide-react';
 import { Button } from '../../ui/button';
 import OrderItemModal from './OrderItemModal';
 import AddOrderItemModal from './AddOrderItemModal';
 import { useSelector } from 'react-redux';
-
-// --- Order Item Modal ---
-
 
 // ---- Main Component ----
 const STATUS_MAP = {
@@ -52,14 +49,29 @@ const OwnerOrderDetailPage = () => {
   const [currentItem, setCurrentItem] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
+  const [isSavingItems, setIsSavingItems] = useState(false);
 
   const user = useSelector((state) => state.userSlice?.user);
   const isReadOnly = user?.restaurantAccessLevel === 'READ_ONLY';
 
+  // Helper: build the items payload for the PUT /items endpoint
+  const buildItemsPayload = (items) =>
+    items.map(i => ({
+      encryptedId: i.encryptedMenuItemId,
+      quantity: i.quantity,
+      note: i.note || null,
+    }));
+
   const fetchMenuItems = async () => {
     try {
-      const res = await axiosOwnerInstance.get('/menu-items/all'); // or your endpoint
-      setMenuItems(res.data);
+      const res = await axiosOwnerInstance.get('/menu-items/search', { params: { name: '' } });
+      // Remap the owner menu-item search response to what AddOrderItemModal expects
+      const mapped = res.data.map(mi => ({
+        encryptedMenuItemId: mi.encryptedId,
+        name: mi.name,
+        price: mi.price,
+      }));
+      setMenuItems(mapped);
     } catch {
       toast.error("Couldn't fetch menu items for adding.");
     }
@@ -83,13 +95,12 @@ const OwnerOrderDetailPage = () => {
     fetchDetails();
   }, [orderId, axiosOwnerInstance]);
 
-  // --- Status update, deletion, print, etc. ---
+  // --- Status update ---
   const handleStatusChange = async (newStatus) => {
     if (isReadOnly) {
       toast.error("Cannot change order status in Read-Only mode.");
       return;
     }
-
     if (!orderId || !order) return;
     const oldStatus = order.status;
     setOrder({ ...order, status: newStatus });
@@ -101,6 +112,8 @@ const OwnerOrderDetailPage = () => {
       toast.error("Failed to update status.");
     }
   };
+
+  // --- Delete whole order ---
   const handleDeleteOrder = async () => {
     if (isReadOnly) {
       toast.error("Cannot delete order in Read-Only mode.");
@@ -117,6 +130,7 @@ const OwnerOrderDetailPage = () => {
       }
     }
   };
+
   const handleBillPrint = () => {
     const style = document.createElement('style');
     style.innerHTML = printCSS;
@@ -136,66 +150,80 @@ const OwnerOrderDetailPage = () => {
     setCurrentItem(item);
     setItemModalOpen(true);
   };
-  const handleModalSave = (updatedItem) => {
-    if (isReadOnly) {
-      toast.error("Cannot edit item in Read-Only mode.");
-      return;
+
+  // Save (edit) an existing item — persist to backend
+  const handleModalSave = async (updatedItem) => {
+    if (isReadOnly) { toast.error("Cannot edit item in Read-Only mode."); return; }
+
+    const updatedItems = order.items.map(i =>
+      i.encryptedMenuItemId === updatedItem.encryptedMenuItemId ? updatedItem : i
+    );
+
+    setIsSavingItems(true);
+    try {
+      const res = await axiosOwnerInstance.put(
+        `/orders/${orderId}/items`,
+        buildItemsPayload(updatedItems)
+      );
+      setOrder(res.data);
+      setItemModalOpen(false);
+      toast.success("Item updated.");
+    } catch {
+      toast.error("Failed to save item changes.");
+    } finally {
+      setIsSavingItems(false);
     }
-    // PATCH backend here if needed.
-    setOrder((o) => ({
-      ...o,
-      items: o.items.map((i) =>
-        (i.menuItemId || i.encryptedMenuItemId || i.id) === (updatedItem.menuItemId || updatedItem.encryptedMenuItemId || updatedItem.id)
-          ? updatedItem
-          : i
-      ),
-      totalAmount: o.items
-        .map(i =>
-          (i.menuItemId || i.encryptedMenuItemId || i.id) === (updatedItem.menuItemId || updatedItem.encryptedMenuItemId || updatedItem.id)
-            ? updatedItem.itemTotal : i.itemTotal)
-        .reduce((a,b) => a + b, 0)
-    }));
-    setItemModalOpen(false);
-    toast.success("Item updated.");
   };
-  const handleModalDelete = (item) => {
-    if (isReadOnly) {
-      toast.error("Cannot delete item in Read-Only mode.");
-      return;
+
+  // Delete an item —  if it is the last item, delete the whole order
+  const handleModalDelete = async (item) => {
+    if (isReadOnly) { toast.error("Cannot delete item in Read-Only mode."); return; }
+
+    const remaining = order.items.filter(i => i.encryptedMenuItemId !== item.encryptedMenuItemId);
+
+    setIsSavingItems(true);
+    try {
+      if (remaining.length === 0) {
+        // Last item — delete the entire order
+        await axiosOwnerInstance.delete(`/orders/${orderId}`);
+        toast.success("Last item removed — order deleted.");
+        navigate('/owner/orders');
+      } else {
+        const res = await axiosOwnerInstance.put(`/orders/${orderId}/items`, buildItemsPayload(remaining));
+        setOrder(res.data);
+        setItemModalOpen(false);
+        toast.success("Item removed.");
+      }
+    } catch {
+      toast.error("Failed to remove item.");
+    } finally {
+      setIsSavingItems(false);
     }
-    // DELETE the item in your backend if required.
-    setOrder((o) => ({
-      ...o,
-      items: o.items.filter(i =>
-        (i.menuItemId || i.encryptedMenuItemId || i.id) !== (item.menuItemId || item.encryptedMenuItemId || item.id)
-      ),
-      totalAmount: o.items
-        .filter(i => (i.menuItemId || i.encryptedMenuItemId || i.id) !== (item.menuItemId || item.encryptedMenuItemId || item.id))
-        .reduce((a, i) => a + i.itemTotal, 0)
-    }));
-    setItemModalOpen(false);
-    toast.success("Item removed.");
   };
+
   const handleAddItemClick = async () => {
-    if (isReadOnly) {
-      toast.error("Cannot add item in Read-Only mode.");
-      return;
-    }
+    if (isReadOnly) { toast.error("Cannot add item in Read-Only mode."); return; }
     await fetchMenuItems();
     setAddModalOpen(true);
   };
-  const handleAddItem = (newItem) => {
-    if (isReadOnly) {
-      toast.error("Cannot add item in Read-Only mode.");
-      return;
+
+  // Add a new item — persist to backend
+  const handleAddItem = async (newItem) => {
+    if (isReadOnly) { toast.error("Cannot add item in Read-Only mode."); return; }
+
+    const updatedItems = [...order.items, newItem];
+
+    setIsSavingItems(true);
+    try {
+      const res = await axiosOwnerInstance.put(`/orders/${orderId}/items`, buildItemsPayload(updatedItems));
+      setOrder(res.data);
+      setAddModalOpen(false);
+      toast.success("Item added to bill.");
+    } catch {
+      toast.error("Failed to add item.");
+    } finally {
+      setIsSavingItems(false);
     }
-    setOrder((o) => ({
-      ...o,
-      items: [...o.items, newItem],
-      totalAmount: o.totalAmount + newItem.itemTotal
-    }));
-    setAddModalOpen(false);
-    toast.success("Item added to bill.");
   };
 
   if (isLoading) return <div className="p-8 text-center text-white">Loading order details...</div>;
@@ -227,7 +255,11 @@ const OwnerOrderDetailPage = () => {
             <Printer className="mr-1" size={17} />
             Print
           </Button>
-          <Button onClick={handleDeleteOrder} className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 rounded-lg">
+          <Button
+            onClick={handleDeleteOrder}
+            disabled={isReadOnly || isSavingItems}
+            className="bg-red-500 hover:bg-red-600 text-white font-bold px-4 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             <Trash2 className="mr-1" size={17} />
             Delete
           </Button>
@@ -240,26 +272,37 @@ const OwnerOrderDetailPage = () => {
           <section className={PANEL + " mb-8"}>
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-2xl font-bold text-white">Order Items</h2>
-              <Button onClick={handleAddItemClick}
-                className="flex items-center gap-1 bg-yellow-500 text-black font-semibold rounded px-4 shadow hover:bg-yellow-400 no-print">
-                <Plus size={16}/>Add Item
+              <Button
+                onClick={handleAddItemClick}
+                disabled={isReadOnly || isSavingItems}
+                className="flex items-center gap-1 bg-yellow-500 text-black font-semibold rounded px-4 shadow hover:bg-yellow-400 no-print disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Plus size={16} />Add Item
               </Button>
             </div>
             <ul className="divide-y divide-gray-700">
               {order.items.map((item, idx) => (
-                <li key={idx} className="py-3 flex justify-between items-center">
-                  <div>
+                <li key={item.encryptedMenuItemId || idx} className="py-3 flex justify-between items-start">
+                  <div className="flex-1 min-w-0 pr-3">
                     <span className="font-semibold">{item.menuItemName}</span>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-gray-400 mt-0.5">
                       {item.quantity} x ₹{item.priceAtOrder.toFixed(2)}
-                      {item.note && <span className="ml-2 text-yellow-200 font-mono">Note: {item.note}</span>}
                     </div>
+                    {item.note && (
+                      <div className="mt-1.5 flex items-start gap-1.5 bg-yellow-500/10 border border-yellow-500/25 rounded-lg px-2.5 py-1.5">
+                        <span className="text-yellow-400 text-xs mt-0.5">📝</span>
+                        <span className="text-yellow-200 text-xs leading-relaxed">{item.note}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-yellow-400 text-lg font-bold">₹{item.itemTotal.toFixed(2)}</span>
-                    <Button variant="ghost" size="sm"
-                      className="text-yellow-400 font-medium flex items-center gap-1 no-print"
-                      onClick={() => openEditModal(item)}><Edit size={15}/>Edit</Button>
+                    <Button
+                      variant="ghost" size="sm"
+                      disabled={isReadOnly || isSavingItems}
+                      className="text-yellow-400 font-medium flex items-center gap-1 no-print disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={() => openEditModal(item)}
+                    >Edit</Button>
                   </div>
                 </li>
               ))}

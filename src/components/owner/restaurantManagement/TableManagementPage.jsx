@@ -3,18 +3,27 @@ import { useReactToPrint } from 'react-to-print';
 import { axiosOwnerInstance } from '../../../axios/instances/axiosInstances';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '../../ui/button';
-import { Trash2, QrCode, Link as LinkIcon, Check, Users } from 'lucide-react';
+import { Trash2, QrCode, Link as LinkIcon, Check, Users, ChevronDown } from 'lucide-react';
 import CommonLoadingSpinner from '../../loadingAnimations/CommonLoading';
 import Cookie from 'js-cookie';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 
-// --- Single Table Card Component with Print + Copy URL + Capacity ---
-const TableCard = ({ table, restaurantEncryptedId, onDelete }) => {
+const STATUS_COLORS = {
+  AVAILABLE: 'bg-green-500/20 text-green-300 border-green-500/40',
+  OCCUPIED: 'bg-red-500/20 text-red-300 border-red-500/40',
+  RESERVED: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40',
+  OUT_OF_SERVICE: 'bg-gray-500/20 text-gray-400 border-gray-500/40',
+};
+const ALL_STATUSES = ['AVAILABLE', 'OCCUPIED', 'RESERVED', 'OUT_OF_SERVICE'];
+
+// --- Single Table Card Component with Print + Copy URL + Capacity + Status ---
+const TableCard = ({ table, restaurantEncryptedId, onDelete, onStatusChange, isReadOnly }) => {
   const printRef = useRef(null);
   const [copied, setCopied] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const customerUrl = `${window.location.origin}/restaurant/${restaurantEncryptedId}/table/${table.encryptedId}`;
-  
+
   const handlePrint = useReactToPrint({
     contentRef: printRef,
     documentTitle: `QR_Code_Table_${table.name.replace(/\s+/g, '_')}`,
@@ -26,7 +35,18 @@ const TableCard = ({ table, restaurantEncryptedId, onDelete }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-        toast.error('Failed to copy URL. Please copy manually.' + (err.response?.data?.message || ''));
+      toast.error('Failed to copy URL. Please copy manually.' + (err.response?.data?.message || ''));
+    }
+  };
+
+  const handleStatusChange = async (e) => {
+    if (isReadOnly) { toast.error('Cannot update table in Read-Only mode.'); return; }
+    const newStatus = e.target.value;
+    setUpdatingStatus(true);
+    try {
+      await onStatusChange(table.encryptedId, newStatus);
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -35,37 +55,54 @@ const TableCard = ({ table, restaurantEncryptedId, onDelete }) => {
       {/* Printable Area */}
       <div ref={printRef} className="p-4 bg-white rounded-lg flex flex-col items-center gap-2 text-black w-full">
         <h3 className="text-xl font-bold">{table.name}</h3>
-        
-        {/* Capacity Display in Card */}
+
         <div className="flex items-center gap-1 text-gray-600 text-sm font-medium mb-1">
-            <Users size={14} />
-            <span>{table.capacity || 4} Seats</span>
+          <Users size={14} />
+          <span>{table.capacity || 4} Seats</span>
         </div>
 
         <QRCodeSVG value={customerUrl} size={180} level="H" includeMargin />
-        
+
         <p className="text-xs text-gray-600 max-w-[180px] text-center mt-1">
           Scan to view menu & order
         </p>
       </div>
 
-      {/* --- Action Buttons --- */}
-      <div className="w-full flex flex-col gap-2 mt-2">
-        {/* Top row for Delete and Print */}
-        <div className="w-full grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onDelete(table.encryptedId)}
-              className="text-red-400 border-red-500/30 hover:bg-red-900 flex-1"
-            >
-              <Trash2 size={16} />
-            </Button>
-            <Button onClick={handlePrint} className="bg-amber-500 hover:bg-amber-600 text-black flex-1">
-              <QrCode size={16} className="mr-2" /> Print
-            </Button>
+      {/* Status Badge + Selector */}
+      <div className="w-full">
+        <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mb-2 ${STATUS_COLORS[table.status] || STATUS_COLORS.AVAILABLE}`}>
+          {table.status?.replace('_', ' ')}
+        </span>
+        <div className="relative">
+          <select
+            value={table.status || 'AVAILABLE'}
+            onChange={handleStatusChange}
+            disabled={updatingStatus || isReadOnly}
+            className="w-full appearance-none bg-black/60 border border-gray-600 rounded-md px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:border-amber-500 disabled:opacity-50"
+          >
+            {ALL_STATUSES.map(s => (
+              <option key={s} value={s}>{s.replace('_', ' ')}</option>
+            ))}
+          </select>
+          <ChevronDown size={14} className="absolute right-2 top-3 text-gray-400 pointer-events-none" />
         </div>
-        
-        {/* Bottom row for Copy URL */}
+      </div>
+
+      {/* --- Action Buttons --- */}
+      <div className="w-full flex flex-col gap-2">
+        <div className="w-full grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onDelete(table.encryptedId)}
+            className="text-red-400 border-red-500/30 hover:bg-red-900 flex-1"
+          >
+            <Trash2 size={16} />
+          </Button>
+          <Button onClick={handlePrint} className="bg-amber-500 hover:bg-amber-600 text-black flex-1">
+            <QrCode size={16} className="mr-2" /> Print
+          </Button>
+        </div>
+
         <Button onClick={handleCopy} className="bg-gray-700 hover:bg-gray-600 text-white w-full">
           {copied ? <Check size={16} className="mr-2 text-green-400" /> : <LinkIcon size={16} className="mr-2" />}
           {copied ? 'Copied!' : 'Copy URL'}
@@ -84,11 +121,11 @@ const TableCard = ({ table, restaurantEncryptedId, onDelete }) => {
 const TableManagementPage = () => {
   const [tables, setTables] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Form State
   const [newTableName, setNewTableName] = useState('');
   const [newTableCapacity, setNewTableCapacity] = useState(4); // Default to 4
-  
+
   const [error, setError] = useState(null);
   const inputRef = useRef(null);
 
@@ -107,7 +144,7 @@ const TableManagementPage = () => {
       const response = await axiosOwnerInstance.get('/tables/list');
       setTables(response.data || []);
     } catch (err) {
-      setError('Failed to fetch tables.'+ (err.response?.data?.message || ''));
+      setError('Failed to fetch tables.' + (err.response?.data?.message || ''));
     } finally {
       setIsLoading(false);
     }
@@ -123,25 +160,25 @@ const TableManagementPage = () => {
       return;
     }
     e.preventDefault();
-    
-    if (!newTableName.trim()){
+
+    if (!newTableName.trim()) {
       setError('Table name cannot be empty.');
       inputRef.current.focus();
       return;
-    } 
+    }
 
-    if (newTableCapacity < 1){
-        setError('Capacity must be at least 1.');
-        return;
+    if (newTableCapacity < 1) {
+      setError('Capacity must be at least 1.');
+      return;
     }
 
     try {
       // Sending capacity in the POST request
-      await axiosOwnerInstance.post('/tables/create', { 
-          name: newTableName.trim(),
-          capacity: parseInt(newTableCapacity)
+      await axiosOwnerInstance.post('/tables/create', {
+        name: newTableName.trim(),
+        capacity: parseInt(newTableCapacity)
       });
-      
+
       // Reset Form
       setNewTableName('');
       setNewTableCapacity(4);
@@ -149,7 +186,7 @@ const TableManagementPage = () => {
       fetchTables();
       toast.success("Table created successfully");
     } catch (err) {
-      setError('Failed to create table.'+ (err.response?.data?.message || ''));
+      setError('Failed to create table.' + (err.response?.data?.message || ''));
     }
   };
 
@@ -164,7 +201,17 @@ const TableManagementPage = () => {
       toast.success("Table deleted");
       fetchTables();
     } catch (err) {
-      setError('Failed to delete table.'+ (err.response?.data?.message || ''));
+      setError('Failed to delete table.' + (err.response?.data?.message || ''));
+    }
+  };
+
+  const handleStatusChange = async (tableEncryptedId, newStatus) => {
+    try {
+      const response = await axiosOwnerInstance.patch(`/tables/${tableEncryptedId}/status`, { status: newStatus });
+      setTables(prev => prev.map(t => t.encryptedId === tableEncryptedId ? response.data : t));
+      toast.success(`Status updated to ${newStatus.replace('_', ' ')}`);
+    } catch (err) {
+      toast.error('Failed to update status.' + (err.response?.data?.message || ''));
     }
   };
 
@@ -187,17 +234,17 @@ const TableManagementPage = () => {
       <div className="mb-8 p-6 bg-gray-900/50 rounded-xl border border-gray-700 shadow-sm max-w-2xl">
         <h2 className="text-lg font-semibold mb-4 text-gray-200">Add New Table</h2>
         <form onSubmit={handleCreateTable} className="flex flex-col sm:flex-row gap-4 items-end">
-          
+
           {/* Table Name Input */}
           <div className="flex-1 w-full space-y-2">
             <label className="text-sm text-gray-400">Table Name / Number</label>
             <input
-                ref={inputRef}
-                type="text"
-                value={newTableName}
-                onChange={(e) => setNewTableName(e.target.value)}
-                placeholder="e.g. Table 5"
-                className="w-full bg-black/70 border border-gray-600 rounded-md p-2.5 focus:outline-none focus:border-amber-500 text-white"
+              ref={inputRef}
+              type="text"
+              value={newTableName}
+              onChange={(e) => setNewTableName(e.target.value)}
+              placeholder="e.g. Table 5"
+              className="w-full bg-black/70 border border-gray-600 rounded-md p-2.5 focus:outline-none focus:border-amber-500 text-white"
             />
           </div>
 
@@ -205,20 +252,20 @@ const TableManagementPage = () => {
           <div className="w-full sm:w-32 space-y-2">
             <label className="text-sm text-gray-400">Capacity</label>
             <div className="relative">
-                <input
-                    type="number"
-                    min="1"
-                    max="50"
-                    value={newTableCapacity}
-                    onChange={(e) => setNewTableCapacity(e.target.value)}
-                    className="w-full bg-black/70 border border-gray-600 rounded-md p-2.5 pl-8 focus:outline-none focus:border-amber-500 text-white"
-                />
-                <Users className="absolute left-2.5 top-3 text-gray-500" size={14} />
+              <input
+                type="number"
+                min="1"
+                max="50"
+                value={newTableCapacity}
+                onChange={(e) => setNewTableCapacity(e.target.value)}
+                className="w-full bg-black/70 border border-gray-600 rounded-md p-2.5 pl-8 focus:outline-none focus:border-amber-500 text-white"
+              />
+              <Users className="absolute left-2.5 top-3 text-gray-500" size={14} />
             </div>
           </div>
 
           <Button type="submit" className="bg-green-600 hover:bg-green-700 h-[42px] px-6 w-full sm:w-auto">
-             Create
+            Create
           </Button>
         </form>
         {error && <p className="text-red-400 mt-3 text-sm flex items-center gap-2"><div className="w-1.5 h-1.5 bg-red-400 rounded-full" /> {error}</p>}
@@ -233,6 +280,8 @@ const TableManagementPage = () => {
               table={table}
               restaurantEncryptedId={restaurantEncryptedId}
               onDelete={handleDeleteTable}
+              onStatusChange={handleStatusChange}
+              isReadOnly={isReadOnly}
             />
           ))}
         </div>

@@ -8,7 +8,7 @@ import Cookie from 'js-cookie';
 import toast from 'react-hot-toast';
 
 // Icons & UI
-import { X, Mail, Eye, EyeOff, ArrowRight, UtensilsCrossed } from 'lucide-react';
+import { X, Mail, Eye, EyeOff, ArrowRight, UtensilsCrossed, FlaskConical, ShieldCheck, Store, UserCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 
 // Assets
@@ -32,6 +32,15 @@ function LoginCommon() {
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [isSendingLink, setIsSendingLink] = useState(false);
+  const [isTestingModalOpen, setIsTestingModalOpen] = useState(false);
+  const [demoLoadingRole, setDemoLoadingRole] = useState(null); // 'owner'|'employee'|'admin'|null
+
+  // ── Demo accounts (credentials never rendered in UI) ──
+  const DEMO_ACCOUNTS = {
+    owner: { email: 's30050852@gmail.com', password: 'siraj@12345' },
+    employee: { email: 'employee@restauron.com', password: 'employee123' }, // placeholder — update later
+    admin: { email: 'Admin@restauron.com', password: 'adminOfRestauron123' },
+  };
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -44,6 +53,69 @@ function LoginCommon() {
   const handleSignupClick = () => {
     dispatch(setSignupOption('restaurant'));
     navigate('/signup');
+  };
+
+  // ── Shared login logic (used by form + demo buttons) ──
+  const quickLogin = async (email, password, demoRole = null) => {
+    if (demoRole) setDemoLoadingRole(demoRole);
+    else setIsLoading(true);
+    setErrorMessage('');
+    try {
+      const response = await axiosLoginInstance.post('', { email, password });
+      if (response.status === 200) {
+        const jwtToken = response.data.token;
+        const refreshToken = response.data.newRefreshToken;
+        const jwtDecoded = jwtDecode(jwtToken);
+        Cookie.set('accessToken', jwtToken, { expires: 1 / 48 });
+        Cookie.set('refreshToken', refreshToken, { expires: 7 });
+        dispatch(setUserDetails({
+          name: jwtDecoded.username,
+          email: jwtDecoded.email,
+          role: jwtDecoded.role,
+          userId: jwtDecoded.userId,
+          status: jwtDecoded.status,
+          restaurantAccessLevel: jwtDecoded.accessLevelStatus,
+          restaurantName: jwtDecoded.restaurantName,
+        }));
+        switch (jwtDecoded.role.toLowerCase()) {
+          case 'admin':
+            navigate('/admin/restaurant/requests');
+            break;
+          case 'owner': {
+            const ownerResponse = await axiosInstances.get(`/owner/get-restaurant-details/${jwtDecoded.userId}`);
+            if (ownerResponse.status === 200) {
+              const { restaurantEncryptedId, restaurantName } = ownerResponse.data;
+              Cookie.set('restaurantId', restaurantEncryptedId);
+              dispatch(setOwnerDetails({ restaurantEncryptedId, restaurantName }));
+            }
+            navigate('/owner/employees/list');
+            break;
+          }
+          case 'employee': {
+            const empResponse = await axiosInstances.get(`/employee/get-restaurant-details/${jwtDecoded.userId}`);
+            if (empResponse.status === 200) {
+              const { restaurantEncryptedId, restaurantName, specialId } = empResponse.data;
+              Cookie.set('restaurantId', restaurantEncryptedId);
+              dispatch(setOwnerDetails({ restaurantEncryptedId, restaurantName }));
+              dispatch(setSpecialId({ specialId }));
+            }
+            navigate('/employee/dashboard');
+            break;
+          }
+          default:
+            setErrorMessage('Invalid role. Please contact support.');
+        }
+      } else if (response.status === 202) {
+        dispatch(setWaitingForApprovalMessage(response.data));
+        navigate('/waiting-for-approval');
+      }
+    } catch {
+      if (demoRole) toast.error(`Demo login failed for ${demoRole}. Credentials may need updating.`);
+      else setErrorMessage('Invalid email or password.');
+    } finally {
+      if (demoRole) setDemoLoadingRole(null);
+      else setIsLoading(false);
+    }
   };
 
   const handleSendResetLink = async (e) => {
@@ -120,18 +192,35 @@ function LoginCommon() {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent" />
 
         {/* Mobile Logo */}
-        <div className="lg:hidden p-6 border-b border-gray-800 flex justify-between items-center">
+        <div className="lg:hidden p-4 border-b border-gray-800 flex justify-between items-center gap-3">
           <img src={LogoGolden} alt="Restauron" className="h-8 w-auto" />
-          <button
-            onClick={handleSignupClick}
-            className="text-sm font-semibold text-yellow-400 border border-yellow-500/40 px-4 py-1.5 rounded-lg hover:bg-yellow-500/10 transition-colors"
-          >
-            Sign Up
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsTestingModalOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-bold text-black bg-yellow-400 hover:bg-yellow-300 px-3 py-1.5 rounded-full shadow-md transition-all"
+            >
+              <FlaskConical size={12} /> For Testing
+            </button>
+            <button
+              onClick={handleSignupClick}
+              className="text-sm font-semibold text-yellow-400 border border-yellow-500/40 px-4 py-1.5 rounded-lg hover:bg-yellow-500/10 transition-colors"
+            >
+              Sign Up
+            </button>
+          </div>
         </div>
 
-        {/* Top right — Sign Up (desktop) */}
-        <div className="hidden lg:flex justify-end p-6">
+        {/* Top right — Sign Up + For Testing (desktop) */}
+        <div className="hidden lg:flex justify-between items-center px-6 pt-6 pb-4">
+          <button
+            type="button"
+            onClick={() => setIsTestingModalOpen(true)}
+            className="flex items-center gap-2 text-xs font-bold text-black bg-yellow-400 hover:bg-yellow-300 px-4 py-2 rounded-full shadow-lg shadow-yellow-500/20 transition-all"
+          >
+            <FlaskConical size={13} />
+            For Testing
+          </button>
           <div className="flex items-center gap-3">
             <span className="text-gray-500 text-sm">Don't have an account?</span>
             <button
@@ -163,68 +252,8 @@ function LoginCommon() {
                 password: Yup.string().required('Password is required'),
               })}
               onSubmit={async (values, { setSubmitting }) => {
-                setIsLoading(true);
-                setErrorMessage('');
-                try {
-                  const response = await axiosLoginInstance.post('', {
-                    email: values.email,
-                    password: values.password,
-                  });
-
-                  if (response.status === 200) {
-                    const jwtToken = response.data.token;
-                    const refreshToken = response.data.newRefreshToken;
-                    const jwtDecoded = jwtDecode(jwtToken);
-
-                    Cookie.set('accessToken', jwtToken, { expires: 1 / 48 });
-                    Cookie.set('refreshToken', refreshToken, { expires: 7 });
-
-                    dispatch(setUserDetails({
-                      name: jwtDecoded.username,
-                      email: jwtDecoded.email,
-                      role: jwtDecoded.role,
-                      userId: jwtDecoded.userId,
-                      status: jwtDecoded.status,
-                      restaurantAccessLevel: jwtDecoded.accessLevelStatus,
-                      restaurantName: jwtDecoded.restaurantName,
-                    }));
-
-                    switch (jwtDecoded.role.toLowerCase()) {
-                      case 'admin':
-                        navigate('/admin/restaurant/requests');
-                        break;
-                      case 'owner':
-                        const ownerResponse = await axiosInstances.get(`/owner/get-restaurant-details/${jwtDecoded.userId}`);
-                        if (ownerResponse.status === 200) {
-                          const { restaurantEncryptedId, restaurantName } = ownerResponse.data;
-                          Cookie.set('restaurantId', restaurantEncryptedId);
-                          dispatch(setOwnerDetails({ restaurantEncryptedId, restaurantName }));
-                        }
-                        navigate('/owner/employees/list');
-                        break;
-                      case 'employee':
-                        const empResponse = await axiosInstances.get(`/employee/get-restaurant-details/${jwtDecoded.userId}`);
-                        if (empResponse.status === 200) {
-                          const { restaurantEncryptedId, restaurantName, specialId } = empResponse.data;
-                          Cookie.set('restaurantId', restaurantEncryptedId);
-                          dispatch(setOwnerDetails({ restaurantEncryptedId, restaurantName }));
-                          dispatch(setSpecialId({ specialId }));
-                          navigate(`/employee/dashboard`);
-                        }
-                        break;
-                      default:
-                        setErrorMessage('Invalid role. Please contact support.');
-                    }
-                  } else if (response.status === 202) {
-                    dispatch(setWaitingForApprovalMessage(response.data));
-                    navigate('/waiting-for-approval');
-                  }
-                } catch (error) {
-                  setErrorMessage('Invalid email or password.');
-                } finally {
-                  setIsLoading(false);
-                  setSubmitting(false);
-                }
+                await quickLogin(values.email, values.password);
+                setSubmitting(false);
               }}
             >
               {({ handleSubmit, handleChange, handleBlur, values, errors, touched, isSubmitting }) => (
@@ -369,6 +398,88 @@ function LoginCommon() {
                 {isSendingLink ? 'Sending…' : 'Send Reset Link'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── FOR TESTING MODAL ── */}
+      {isTestingModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-gray-950 border border-gray-800 rounded-2xl p-7 w-full max-w-sm shadow-2xl relative">
+            {/* Close */}
+            <button
+              onClick={() => setIsTestingModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors p-1"
+            >
+              <X size={18} />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-yellow-500/10 border border-yellow-500/30 rounded-xl flex items-center justify-center">
+                <FlaskConical size={18} className="text-yellow-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white">Demo Access</h2>
+                <p className="text-xs text-gray-500">Quick login for evaluation</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-600 mb-6 border-t border-gray-800 pt-4">
+              Click any role below to instantly sign in with a pre-configured demo account.
+            </p>
+
+            {/* Role buttons */}
+            <div className="flex flex-col gap-3">
+              {[
+                {
+                  role: 'owner',
+                  label: 'Login as Owner',
+                  desc: 'Full restaurant management access',
+                  Icon: Store,
+                  color: 'border-yellow-500/40 hover:border-yellow-500 hover:bg-yellow-500/5 text-yellow-400',
+                  iconBg: 'bg-yellow-500/10',
+                },
+                {
+                  role: 'employee',
+                  label: 'Login as Employee',
+                  desc: 'POS, orders & kitchen display',
+                  Icon: UserCircle,
+                  color: 'border-blue-500/40 hover:border-blue-500 hover:bg-blue-500/5 text-blue-400',
+                  iconBg: 'bg-blue-500/10',
+                },
+                {
+                  role: 'admin',
+                  label: 'Login as Admin',
+                  desc: 'Platform-wide administration',
+                  Icon: ShieldCheck,
+                  color: 'border-green-500/40 hover:border-green-500 hover:bg-green-500/5 text-green-400',
+                  iconBg: 'bg-green-500/10',
+                },
+              ].map(({ role, label, desc, Icon, color, iconBg }) => (
+                <button
+                  key={role}
+                  disabled={demoLoadingRole !== null}
+                  onClick={() => quickLogin(DEMO_ACCOUNTS[role].email, DEMO_ACCOUNTS[role].password, role)}
+                  className={`flex items-center gap-4 w-full border rounded-xl px-4 py-3.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${color}`}
+                >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                    {demoLoadingRole === role ? (
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Icon size={17} />
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-white">{label}</p>
+                    <p className="text-xs text-gray-500">{desc}</p>
+                  </div>
+                  {demoLoadingRole !== role && (
+                    <ArrowRight size={15} className="ml-auto opacity-40" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

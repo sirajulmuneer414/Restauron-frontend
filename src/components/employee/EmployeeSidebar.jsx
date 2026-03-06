@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, Lock, ShoppingCart, UtensilsCrossed, Menu } from 'lucide-react';
+import { LayoutDashboard, User, Settings, LogOut, ChevronLeft, ChevronRight, Lock, ShoppingCart, UtensilsCrossed, Menu, Table2, ListOrdered } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
@@ -11,7 +11,7 @@ const EmployeeSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const user = useSelector((state) => state.userSlice.user); // Get user data from Redux
 
   // Logout handler
@@ -19,13 +19,13 @@ const EmployeeSidebar = () => {
     // Remove BOTH tokens
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');
-    
+
     // Clear Redux state
     dispatch(resetUserDetails());
-   
+
     // Show success message
     toast.success('Logged out successfully');
-    
+
     // Redirect to login
     navigate('/login');
   };
@@ -71,8 +71,8 @@ const EmployeeSidebar = () => {
         </button>
       </div>
 
-      {/* Main Navigation */}
-      <nav className="flex-grow px-4 py-6 space-y-2">
+      {/* Main Navigation — scrollable so logout is never pushed off-screen */}
+      <nav className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-2">
         <NavItem to="/employee/dashboard" icon={LayoutDashboard}>
           Dashboard
         </NavItem>
@@ -85,16 +85,22 @@ const EmployeeSidebar = () => {
         <NavItem to="/employee/pos" icon={ShoppingCart}>
           New Order (POS)
         </NavItem>
+        <NavItem to="/employee/orders" icon={ListOrdered}>
+          Orders
+        </NavItem>
         <NavItem to="/employee/kitchen" icon={UtensilsCrossed}>
           Kitchen Display
+        </NavItem>
+        <NavItem to="/employee/tables" icon={Table2}>
+          Table Management
         </NavItem>
         <NavItem to="/employee/change-password" icon={Lock}>
           Change Password
         </NavItem>
       </nav>
 
-      {/* Footer / User Profile & Logout Area */}
-      <div className={`px-4 pt-4 border-t border-gray-800/60`}>
+      {/* Footer / User Profile & Logout — always visible at bottom */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-3 border-t border-gray-800/60">
         <div className="flex items-center gap-3">
           <img
             src={`https://ui-avatars.com/api/?name=${user?.name.replace(' ', '+')}&background=f59e0b&color=000`}
@@ -106,7 +112,7 @@ const EmployeeSidebar = () => {
             <p className="text-xs text-gray-400 whitespace-nowrap">Employee</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={handleLogout}
           className={`w-full mt-4 mb-1 flex items-center gap-4 px-4 py-3 rounded-lg transition-colors duration-200 
                      text-red-400 hover:bg-red-500/10 hover:text-red-300 border-l-4 border-transparent hover:border-red-500

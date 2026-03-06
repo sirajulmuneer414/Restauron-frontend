@@ -164,32 +164,32 @@ function RestaurantSignup() {
 
     try {
 
-      
-    const form = new FormData();
 
-    form.append("name", formData.yourName);
-    form.append("email", formData.yourEmail);
-    form.append("password", formData.password);
-    form.append("aadhaarNumber", formData.aadhaarNumber);
-    form.append("restaurantName", formData.restaurantName);
-    form.append("restaurantAddress", formData.restaurantAddress);
-    form.append("restaurantPhone", formData.restaurantPhone);
-    form.append("district", formData.district);
-    form.append("state", formData.state);
-    form.append("pincode", formData.pincode);
+      const form = new FormData();
 
-    // Optional/nullable fields (ensure you don't append undefined)
-    if(formData.restaurantEmail) form.append("restaurantEmail", formData.restaurantEmail);
-    if (formData.yourPhone) form.append("phone", formData.yourPhone);
+      form.append("name", formData.yourName);
+      form.append("email", formData.yourEmail);
+      form.append("password", formData.password);
+      form.append("aadhaarNumber", formData.aadhaarNumber);
+      form.append("restaurantName", formData.restaurantName);
+      form.append("restaurantAddress", formData.restaurantAddress);
+      form.append("restaurantPhone", formData.restaurantPhone);
+      form.append("district", formData.district);
+      form.append("state", formData.state);
+      form.append("pincode", formData.pincode);
 
-    // File field
-    if (formData.aadhaarImage) {
-      form.append("aadhaarPhoto", formData.aadhaarImage);
-    }
+      // Optional/nullable fields (ensure you don't append undefined)
+      if (formData.restaurantEmail) form.append("restaurantEmail", formData.restaurantEmail);
+      if (formData.yourPhone) form.append("phone", formData.yourPhone);
+
+      // File field
+      if (formData.aadhaarImage) {
+        form.append("aadhaarPhoto", formData.aadhaarImage);
+      }
 
       // console.log("Submitting form data:", formData);
 
-     
+
 
 
       const response = await axiosSignupInstance.post("/restaurant", form);
@@ -256,6 +256,33 @@ function RestaurantSignup() {
                     placeholder={field.label}
                     className="p-2 rounded-md text-white border border-gray-300 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                   />
+                ) : (field.name === "password" || field.name === "confirmPassword") ? (
+                  <div className="relative">
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      value={formData[field.name]}
+                      onChange={handleinputChange}
+                      placeholder={field.label}
+                      className="w-full p-2 pr-10 rounded-md text-white border border-gray-300 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        field.name === "password"
+                          ? setShowPassword((s) => !s)
+                          : setShowConfirmPassword((s) => !s)
+                      }
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-amber-400 transition-colors focus:outline-none"
+                      tabIndex={-1}
+                    >
+                      {(field.name === "password" ? showPassword : showConfirmPassword) ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                      )}
+                    </button>
+                  </div>
                 ) : (
                   <input
                     type={field.type}
@@ -265,16 +292,6 @@ function RestaurantSignup() {
                     placeholder={field.label}
                     className="p-2 rounded-md text-white border border-gray-300 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
                   />
-                )}
-                {(field.name === "password") && (
-                  <Button type="button" variant="ghost" className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-amber-500 hover:bg-transparent" onClick={() => setShowPassword((show) => !show)}>
-                    {showPassword ? 'Hide' : 'Show'}
-                  </Button>
-                )}
-                {(field.name === "confirmPassword") && (
-                  <Button type="button" variant="ghost" className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-amber-500 hover:bg-transparent" onClick={() => setShowConfirmPassword((show) => !show)}>
-                    {showConfirmPassword ? 'Hide' : 'Show'}
-                  </Button>
                 )}
                 {errors[field.name] && <p className="text-red-500 text-sm">{errors[field.name]}</p>}
               </div>

@@ -51,8 +51,19 @@ export const useEmployeeService = () => {
 
     // Create a new order (Used by POS)
     createOrder: async (orderRequest) => {
-        // orderRequest matches the new DTO structure
         const response = await axiosEmployeeInstance.post('/orders', orderRequest);
+        return response.data;
+    },
+
+    // Paginated order list for the Order Management page
+    getOrdersPage: async (payload) => {
+        const response = await axiosEmployeeInstance.post('/orders/list', payload);
+        return response.data; // Returns Spring Page<OrderSummaryDto>
+    },
+
+    // Full detail for one order
+    getOrderDetail: async (orderId) => {
+        const response = await axiosEmployeeInstance.get(`/orders/${orderId}`);
         return response.data;
     },
 
@@ -74,6 +85,17 @@ export const useEmployeeService = () => {
             }
         });
         return response.data; // Returns { content: [...], totalPages: 5 }
+    },
+
+    // Replace all items on an existing order and recalculate the total
+    updateOrderItems: async (orderId, items) => {
+        const response = await axiosEmployeeInstance.put(`/orders/${orderId}/items`, items);
+        return response.data;
+    },
+
+    // Delete an order entirely
+    deleteOrder: async (orderId) => {
+        await axiosEmployeeInstance.delete(`/orders/${orderId}`);
     },
 }
 };
